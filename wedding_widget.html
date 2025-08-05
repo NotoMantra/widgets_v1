@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Save the Date</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5e6e0 0%, #faf0ed 50%, #f8f1ef 100%);
+            font-family: 'Playfair Display', 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            padding: 20px;
+        }
+        
+        .wedding-container {
+            background: linear-gradient(135deg, rgba(237, 194, 164, 0.3) 0%, rgba(245, 230, 224, 0.5) 100%);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(237, 194, 164, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(237, 194, 164, 0.2);
+            max-width: 800px;
+            width: 100%;
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .wedding-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(237, 194, 164, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .setup-form {
+            z-index: 2;
+        }
+        
+        .setup-title {
+            font-size: 2rem;
+            color: #b8860b;
+            margin-bottom: 15px;
+            font-weight: 400;
+            text-shadow: 0 2px 4px rgba(184, 134, 11, 0.1);
+        }
+        
+        .setup-subtitle {
+            color: #cd853f;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid rgba(237, 194, 164, 0.6);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #8b4513;
+            font-size: 1rem;
+            font-family: 'Playfair Display', serif;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input::placeholder {
+            color: rgba(139, 69, 19, 0.5);
+            font-style: italic;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #daa520;
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.02);
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #daa520, #b8860b);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(218, 165, 32, 0.3);
+            background: linear-gradient(135deg, #b8860b, #daa520);
+        }
+        
+        .wedding-display {
+            display: none;
+            z-index: 2;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+        
+        .decorative-border {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 3px solid rgba(237, 194, 164, 0.6);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+        
+        .decorative-border::before,
+        .decorative-border::after {
+            content: '❦';
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(237, 194, 164, 0.8);
+            top: -15px;
+        }
+        
+        .decorative-border::before {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .decorative-border::after {
+            right: 50%;
+            transform: translateX(50%);
+            bottom: -15px;
+            top: auto;
+        }
+        
+        .wedding-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+        }
+        
+        .couple-names {
+            font-size: 3.5rem;
+            color: #b8860b;
+            font-weight: 400;
+            margin-bottom: 20px;
+            text-shadow: 0 3px 6px rgba(184, 134, 11, 0.2);
+            line-height: 1.1;
+        }
+        
+        .couple-names .ampersand {
+            font-size: 2.5rem;
+            color: #daa520;
+            margin: 0 15px;
+            font-style: italic;
+        }
+        
+        .wedding-title {
+            font-size: 1.8rem;
+            color: #cd853f;
+            font-style: italic;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        
+        .wedding-date {
+            font-size: 2.2rem;
+            color: #b8860b;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .save-text {
+            font-size: 1.2rem;
+            color: #cd853f;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .heart {
+            position: absolute;
+            color: rgba(237, 194, 164, 0.6);
+            font-size: 1.5rem;
+            animation: float-heart 8s infinite linear;
+        }
+        
+        @keyframes float-heart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .edit-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(237, 194, 164, 0.3);
+            border: 1px solid rgba(237, 194, 164, 0.6);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            color: #b8860b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(237, 194, 164, 0.5);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) {
+            .wedding-container {
+                aspect-ratio: 4/3;
+            }
+            
+            .couple-names {
+                font-size: 2.5rem;
+            }
+            
+            .wedding-title {
+                font-size: 1.4rem;
+            }
+            
+            .wedding-date {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wedding-container">
+        <div class="floating-hearts">
+            <div class="heart" style="left: 10%; animation-delay: 0s;">♥</div>
+            <div class="heart" style="left: 20%; animation-delay: 2s;">♡</div>
+            <div class="heart" style="left: 30%; animation-delay: 4s;">♥</div>
+            <div class="heart" style="left: 70%; animation-delay: 6s;">♡</div>
+            <div class="heart" style="left: 80%; animation-delay: 8s;">♥</div>
+            <div class="heart" style="left: 90%; animation-delay: 10s;">♡</div>
+        </div>
+        
+        <div class="setup-form" id="setupForm">
+            <h2 class="setup-title">✨ Create Your Wedding Invitation ✨</h2>
+            <p class="setup-subtitle">Fill in your beautiful love story details</p>
+            
+            <div class="form-group">
+                <label class="form-label">Bride's Name</label>
+                <input type="text" class="form-input" id="brideName" placeholder="e.g., Anita">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Groom's Name</label>
+                <input type="text" class="form-input" id="groomName" placeholder="e.g., Sam">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Wedding Date</label>
+                <input type="date" class="form-input" id="weddingDate">
+            </div>
+            
+            <button class="save-btn" onclick="saveWeddingDetails()">
+                💕 Create My Invitation
+            </button>
+        </div>
+        
+        <div class="wedding-display" id="weddingDisplay">
+            <div class="decorative-border"></div>
+            
+            <div class="wedding-content">
+                <div class="couple-names">
+                    <span id="displayBride">Anita</span>
+                    <span class="ampersand">&</span>
+                    <span id="displayGroom">Sam</span>
+                </div>
+                
+                <div class="wedding-title">Are Getting Married</div>
+                
+                <div class="wedding-date" id="displayDate">December 15, 2024</div>
+                
+                <div class="save-text">Save The Date</div>
+            </div>
+            
+            <button class="edit-btn" onclick="editDetails()" title="Edit Details">
+                ✏️
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function saveWeddingDetails() {
+            const bride = document.getElementById('brideName').value.trim();
+            const groom = document.getElementById('groomName').value.trim();
+            const date = document.getElementById('weddingDate').value;
+            
+            if (!bride || !groom || !date) {
+                alert('Please fill in all the details! 💕');
+                return;
+            }
+            
+            // Save to localStorage
+            const weddingData = {
+                bride: bride,
+                groom: groom,
+                date: date
+            };
+            
+            localStorage.setItem('weddingDetails', JSON.stringify(weddingData));
+            
+            // Generate permanent URL
+            generatePermanentURL(weddingData);
+            
+            // Display the wedding invitation
+            displayWedding(weddingData);
+        }
+        
+        function generatePermanentURL(data) {
+            const baseURL = window.location.origin + window.location.pathname;
+            const permanentURL = `${baseURL}?bride=${encodeURIComponent(data.bride)}&groom=${encodeURIComponent(data.groom)}&date=${data.date}`;
+            
+            // Show the permanent URL to user
+            setTimeout(() => {
+                if (confirm('💡 Want a permanent link that works everywhere? This will save your invitation forever!')) {
+                    prompt('📋 Copy this URL - it will always show your invitation:', permanentURL);
+                }
+            }, 2000);
+        }
+        
+        function displayWedding(data) {
+            // Update display elements
+            document.getElementById('displayBride').textContent = data.bride;
+            document.getElementById('displayGroom').textContent = data.groom;
+            
+            // Format date beautifully
+            const dateObj = new Date(data.date);
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const formattedDate = dateObj.toLocaleDateString('en-US', options);
+            document.getElementById('displayDate').textContent = formattedDate;
+            
+            // Switch views
+            document.getElementById('setupForm').style.display = 'none';
+            document.getElementById('weddingDisplay').style.display = 'block';
+            
+            // Add entrance animation
+            document.getElementById('weddingDisplay').style.animation = 'fadeIn 1s ease-in';
+        }
+        
+        function editDetails() {
+            document.getElementById('setupForm').style.display = 'block';
+            document.getElementById('weddingDisplay').style.display = 'none';
+        }
+        
+        function loadSavedDetails() {
+            // First check URL parameters (most reliable)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlBride = urlParams.get('bride');
+            const urlGroom = urlParams.get('groom');
+            const urlDate = urlParams.get('date');
+            
+            if (urlBride && urlGroom && urlDate) {
+                const data = {
+                    bride: decodeURIComponent(urlBride),
+                    groom: decodeURIComponent(urlGroom),
+                    date: urlDate
+                };
+                
+                // Pre-fill form
+                document.getElementById('brideName').value = data.bride;
+                document.getElementById('groomName').value = data.groom;
+                document.getElementById('weddingDate').value = data.date;
+                
+                // Also save to localStorage for backup
+                localStorage.setItem('weddingDetails', JSON.stringify(data));
+                
+                // Show wedding display
+                displayWedding(data);
+                return;
+            }
+            
+            // Fallback to localStorage
+            const saved = localStorage.getItem('weddingDetails');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                // Pre-fill form
+                document.getElementById('brideName').value = data.bride;
+                document.getElementById('groomName').value = data.groom;
+                document.getElementById('weddingDate').value = data.date;
+                
+                // Show wedding display
+                displayWedding(data);
+            }
+        }
+        
+        // Add fade in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.9); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Load saved details on page load
+        window.addEventListener('load', loadSavedDetails);
+        
+        // Add romantic sparkle effect
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = '✨';
+            sparkle.style.position = 'absolute';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.fontSize = Math.random() * 1 + 0.5 + 'rem';
+            sparkle.style.color = 'rgba(237, 194, 164, 0.8)';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.animation = 'sparkle 3s ease-out forwards';
+            
+            document.querySelector('.wedding-container').appendChild(sparkle);
+            
+            setTimeout(() => sparkle.remove(), 3000);
+        }
+        
+        // Add sparkle animation
+        const sparkleStyle = document.createElement('style');
+        sparkleStyle.textContent = `
+            @keyframes sparkle {
+                0% { opacity: 1; transform: scale(0) rotate(0deg); }
+                50% { opacity: 1; transform: scale(1) rotate(180deg); }
+                100% { opacity: 0; transform: scale(0) rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(sparkleStyle);
+        
+        // Create sparkles periodically
+        setInterval(createSparkle, 2000);
+    </script>
+</body>
+</html>
