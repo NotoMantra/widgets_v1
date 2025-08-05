@@ -12,7 +12,7 @@
         }
         
         body {
-            background: #fdf2f8;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
             font-family: 'Georgia', serif;
             margin: 0;
             padding: 5px;
@@ -23,14 +23,12 @@
         }
         
         .wedding-widget {
-            background: rgba(253, 242, 248, 0.9);
-            border: 2px solid rgba(251, 207, 232, 0.8);
-            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(253, 242, 248, 0.95) 100%);
+            border: 2px solid rgba(236, 72, 153, 0.3);
+            border-radius: 20px;
             padding: 20px;
             width: calc(100% - 10px);
             height: calc(100% - 10px);
-            max-width: none;
-            max-height: none;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -38,6 +36,7 @@
             align-items: center;
             text-align: center;
             box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.1);
         }
         
         /* Setup Form Styles */
@@ -56,19 +55,21 @@
             color: #be185d;
             margin-bottom: 15px;
             font-weight: 600;
+            text-shadow: 0 1px 2px rgba(190, 24, 93, 0.1);
         }
         
         .form-input {
             width: 90%;
-            padding: 8px 12px;
-            border: 2px solid rgba(251, 207, 232, 0.8);
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border: 2px solid rgba(236, 72, 153, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.8);
             color: #be185d;
             font-size: 0.85rem;
             font-family: 'Georgia', serif;
             margin-bottom: 8px;
             text-align: center;
+            transition: border-color 0.2s ease;
         }
         
         .form-input::placeholder {
@@ -79,25 +80,26 @@
         .form-input:focus {
             outline: none;
             border-color: #ec4899;
-            background: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.95);
         }
         
         .save-btn {
             width: 90%;
-            padding: 10px;
-            background: #ec4899;
+            padding: 12px;
+            background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
             border: none;
-            border-radius: 15px;
+            border-radius: 25px;
             color: white;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             font-family: 'Georgia', serif;
-            margin-top: 5px;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.2);
         }
         
         .save-btn:hover {
-            background: #db2777;
+            background: linear-gradient(135deg, #db2777 0%, #ec4899 100%);
         }
         
         /* Wedding Display Styles */
@@ -109,61 +111,84 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
+        }
+        
+        .wedding-display::before {
+            content: '💕';
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 1rem;
+            color: rgba(236, 72, 153, 0.3);
+        }
+        
+        .wedding-display::after {
+            content: '💕';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1rem;
+            color: rgba(236, 72, 153, 0.3);
         }
         
         .couple-names {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             color: #be185d;
             font-weight: 600;
             margin-bottom: 15px;
             line-height: 1.2;
+            text-shadow: 0 1px 3px rgba(190, 24, 93, 0.1);
         }
         
         .couple-names .weds {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: #ec4899;
-            margin: 0 8px;
+            margin: 0 10px;
             font-style: italic;
+            font-weight: 400;
         }
         
         .countdown-section {
-            margin-top: 10px;
+            margin-top: 12px;
+            text-align: center;
         }
         
         .countdown-number {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: #be185d;
             font-weight: 700;
             margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(190, 24, 93, 0.1);
         }
         
         .countdown-text {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #db2777;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
         
         .edit-btn {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(251, 207, 232, 0.6);
-            border: 1px solid rgba(251, 207, 232, 0.8);
+            bottom: 12px;
+            right: 12px;
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.3);
             border-radius: 50%;
-            width: 25px;
-            height: 25px;
+            width: 28px;
+            height: 28px;
             color: #be185d;
             cursor: pointer;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .edit-btn:hover {
-            background: rgba(251, 207, 232, 0.8);
+            background: rgba(236, 72, 153, 0.2);
         }
     </style>
 </head>
@@ -210,7 +235,7 @@
                 return;
             }
             
-            // Generate unique instance ID for privacy
+            // Generate or get instance ID for privacy
             let instanceId = getInstanceId();
             
             const weddingData = {
@@ -219,8 +244,12 @@
                 date: date
             };
             
-            // Save with unique instance ID
+            // Save with unique instance ID to prevent conflicts
             localStorage.setItem(`wedding_compact_${instanceId}`, JSON.stringify(weddingData));
+            localStorage.setItem('wedding_current_instance', instanceId);
+            
+            console.log('Data saved:', weddingData);
+            console.log('Instance ID:', instanceId);
             
             // Display the wedding countdown
             displayWedding(weddingData);
@@ -231,15 +260,23 @@
             const urlParams = new URLSearchParams(window.location.search);
             let instanceId = urlParams.get('id');
             
-            // If no ID in URL, create new unique ID
+            // If no ID in URL, check for existing current instance
             if (!instanceId) {
-                instanceId = 'compact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                instanceId = localStorage.getItem('wedding_current_instance');
+            }
+            
+            // If still no ID, create new unique ID
+            if (!instanceId) {
+                instanceId = 'wedding_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('wedding_current_instance', instanceId);
             }
             
             return instanceId;
         }
         
         function displayWedding(data) {
+            console.log('Displaying wedding data:', data);
+            
             // Update display elements
             document.getElementById('displayBride').textContent = data.bride;
             document.getElementById('displayGroom').textContent = data.groom;
@@ -275,16 +312,19 @@
         }
         
         function loadSavedDetails() {
-            // Get instance ID from URL
+            console.log('Loading saved details...');
+            
+            // Get instance ID from URL first
             const urlParams = new URLSearchParams(window.location.search);
             const instanceId = urlParams.get('id');
             
-            // First check URL parameters (most reliable)
+            // First check URL parameters (for shared links)
             const urlBride = urlParams.get('bride');
             const urlGroom = urlParams.get('groom');
             const urlDate = urlParams.get('date');
             
             if (urlBride && urlGroom && urlDate) {
+                console.log('Loading from URL parameters');
                 const data = {
                     bride: decodeURIComponent(urlBride),
                     groom: decodeURIComponent(urlGroom),
@@ -299,6 +339,7 @@
                 // Also save to localStorage with instance ID if available
                 if (instanceId) {
                     localStorage.setItem(`wedding_compact_${instanceId}`, JSON.stringify(data));
+                    localStorage.setItem('wedding_current_instance', instanceId);
                 }
                 
                 // Show wedding display
@@ -306,27 +347,61 @@
                 return;
             }
             
-            // Fallback to localStorage with instance ID
-            if (instanceId) {
-                const saved = localStorage.getItem(`wedding_compact_${instanceId}`);
+            // Check localStorage with instance ID
+            let savedData = null;
+            let currentInstanceId = instanceId || localStorage.getItem('wedding_current_instance');
+            
+            if (currentInstanceId) {
+                console.log('Checking localStorage for instance:', currentInstanceId);
+                const saved = localStorage.getItem(`wedding_compact_${currentInstanceId}`);
                 if (saved) {
-                    const data = JSON.parse(saved);
-                    
-                    // Pre-fill form
-                    document.getElementById('brideName').value = data.bride;
-                    document.getElementById('groomName').value = data.groom;
-                    document.getElementById('weddingDate').value = data.date;
-                    
-                    // Show wedding display
-                    displayWedding(data);
+                    savedData = JSON.parse(saved);
                 }
+            }
+            
+            // Fallback: check for any wedding data in localStorage
+            if (!savedData) {
+                console.log('Checking for any saved wedding data...');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('wedding_compact_')) {
+                        console.log('Found saved data with key:', key);
+                        const saved = localStorage.getItem(key);
+                        if (saved) {
+                            savedData = JSON.parse(saved);
+                            // Update current instance
+                            localStorage.setItem('wedding_current_instance', key.replace('wedding_compact_', ''));
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (savedData) {
+                console.log('Loading saved data:', savedData);
+                
+                // Pre-fill form
+                document.getElementById('brideName').value = savedData.bride;
+                document.getElementById('groomName').value = savedData.groom;
+                document.getElementById('weddingDate').value = savedData.date;
+                
+                // Show wedding display
+                displayWedding(savedData);
+            } else {
+                console.log('No saved data found, showing form');
             }
         }
         
-        // Load saved details on page load
+        // Load saved details when page loads
         window.addEventListener('load', () => {
+            console.log('Page loaded, checking for saved data...');
             loadSavedDetails();
         });
+        
+        // Also try loading immediately in case the event already fired
+        if (document.readyState === 'complete') {
+            loadSavedDetails();
+        }
     </script>
 </body>
 </html>
