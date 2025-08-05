@@ -12,47 +12,32 @@
         }
         
         body {
-            background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fdf2f8 100%);
+            background: #fdf2f8;
             font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 5px;
+            height: 200px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 144px;
-            height: 144px;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
         }
         
         .wedding-widget {
-            background: linear-gradient(135deg, rgba(253, 242, 248, 0.8) 0%, rgba(252, 231, 243, 0.9) 100%);
-            backdrop-filter: blur(15px);
-            border: 1.5px solid rgba(251, 207, 232, 0.6);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 8px 25px rgba(251, 207, 232, 0.2);
-            width: 100%;
-            height: 100%;
-            max-width: 300px;
-            max-height: 144px;
+            background: rgba(253, 242, 248, 0.9);
+            border: 2px solid rgba(251, 207, 232, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            max-width: none;
+            max-height: none;
             position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             text-align: center;
-        }
-        
-        .widget-bg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(251, 207, 232, 0.05) 0%, transparent 70%);
-            pointer-events: none;
+            box-sizing: border-box;
         }
         
         /* Setup Form Styles */
@@ -62,28 +47,27 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            padding-top: 5px;
+            justify-content: center;
+            align-items: center;
         }
         
         .setup-title {
-            font-size: 0.85rem;
+            font-size: 1.1rem;
             color: #be185d;
-            margin-bottom: 6px;
+            margin-bottom: 15px;
             font-weight: 600;
         }
         
         .form-input {
-            width: 100%;
-            padding: 5px 8px;
-            border: 1.5px solid rgba(251, 207, 232, 0.8);
-            border-radius: 12px;
+            width: 90%;
+            padding: 8px 12px;
+            border: 2px solid rgba(251, 207, 232, 0.8);
+            border-radius: 15px;
             background: rgba(255, 255, 255, 0.9);
             color: #be185d;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             font-family: 'Georgia', serif;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
+            margin-bottom: 8px;
             text-align: center;
         }
         
@@ -99,22 +83,21 @@
         }
         
         .save-btn {
-            width: 100%;
-            padding: 6px;
-            background: linear-gradient(135deg, #ec4899, #fbcfe8);
+            width: 90%;
+            padding: 10px;
+            background: #ec4899;
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             color: white;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             font-family: 'Georgia', serif;
-            transition: background 0.2s ease;
-            margin-top: 2px;
+            margin-top: 5px;
         }
         
         .save-btn:hover {
-            background: linear-gradient(135deg, #db2777, #fbcfe8);
+            background: #db2777;
         }
         
         /* Wedding Display Styles */
@@ -123,115 +106,69 @@
             z-index: 2;
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 12px;
         }
         
         .couple-names {
-            font-size: 1rem;
+            font-size: 1.4rem;
             color: #be185d;
             font-weight: 600;
-            margin-bottom: 5px;
-            text-shadow: 0 1px 3px rgba(190, 24, 93, 0.1);
-            line-height: 1.1;
+            margin-bottom: 15px;
+            line-height: 1.2;
         }
         
         .couple-names .weds {
-            font-size: 0.75rem;
+            font-size: 1rem;
             color: #ec4899;
-            margin: 0 4px;
+            margin: 0 8px;
             font-style: italic;
         }
         
         .countdown-section {
-            margin-top: 8px;
+            margin-top: 10px;
         }
         
         .countdown-number {
-            font-size: 1.8rem;
+            font-size: 2.5rem;
             color: #be185d;
             font-weight: 700;
-            margin-bottom: 2px;
-            text-shadow: 0 2px 4px rgba(190, 24, 93, 0.1);
+            margin-bottom: 5px;
         }
         
         .countdown-text {
-            font-size: 0.7rem;
+            font-size: 0.9rem;
             color: #db2777;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .heart-decoration {
-            position: absolute;
-            font-size: 0.7rem;
-            color: rgba(251, 207, 232, 0.4);
-            animation: none;
-        }
-        
-        .heart-decoration:nth-child(1) {
-            top: 8px;
-            left: 12px;
-        }
-        
-        .heart-decoration:nth-child(2) {
-            top: 10px;
-            right: 12px;
-        }
-        
-        .heart-decoration:nth-child(3) {
-            bottom: 8px;
-            left: 15px;
-        }
-        
-        .heart-decoration:nth-child(4) {
-            bottom: 10px;
-            right: 15px;
+            letter-spacing: 1px;
         }
         
         .edit-btn {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: rgba(251, 207, 232, 0.4);
+            bottom: 10px;
+            right: 10px;
+            background: rgba(251, 207, 232, 0.6);
             border: 1px solid rgba(251, 207, 232, 0.8);
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             color: #be185d;
             cursor: pointer;
-            font-size: 0.6rem;
-            transition: all 0.2s ease;
+            font-size: 0.7rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3;
         }
         
         .edit-btn:hover {
-            background: rgba(251, 207, 232, 0.6);
-            transform: scale(1.05);
-        }
-        
-        .wedding-passed {
-            background: linear-gradient(135deg, #fbcfe8 0%, #fdf2f8 100%);
-        }
-        
-        .wedding-passed .countdown-text {
-            color: #ec4899;
+            background: rgba(251, 207, 232, 0.8);
         }
     </style>
 </head>
 <body>
     <div class="wedding-widget">
-        <div class="widget-bg"></div>
-        
         <!-- Setup Form -->
         <div class="setup-form" id="setupForm">
             <h3 class="setup-title">💕 Wedding Countdown</h3>
@@ -247,11 +184,6 @@
         
         <!-- Wedding Display -->
         <div class="wedding-display" id="weddingDisplay" style="display: none;">
-            <div class="heart-decoration">💕</div>
-            <div class="heart-decoration">💖</div>
-            <div class="heart-decoration">💕</div>
-            <div class="heart-decoration">💖</div>
-            
             <div class="couple-names">
                 <span id="displayBride"></span>
                 <span class="weds">weds</span>
@@ -320,39 +252,26 @@
             
             const daysCountEl = document.getElementById('daysCount');
             const countdownTextEl = document.getElementById('countdownText');
-            const widget = document.querySelector('.wedding-widget');
             
             if (daysDiff > 0) {
                 daysCountEl.textContent = daysDiff;
                 countdownTextEl.textContent = daysDiff === 1 ? 'day to go' : 'days to go';
-                widget.classList.remove('wedding-passed');
             } else if (daysDiff === 0) {
                 daysCountEl.textContent = '🎉';
                 countdownTextEl.textContent = 'Wedding Day!';
-                widget.classList.add('wedding-passed');
             } else {
                 daysCountEl.textContent = Math.abs(daysDiff);
                 countdownTextEl.textContent = Math.abs(daysDiff) === 1 ? 'day ago' : 'days ago';
-                widget.classList.add('wedding-passed');
             }
             
             // Switch views
             document.getElementById('setupForm').style.display = 'none';
-            const weddingDisplay = document.getElementById('weddingDisplay');
-            weddingDisplay.style.display = 'flex';
-            
-            // Debug log
-            console.log('Wedding display should now be visible with:', data);
+            document.getElementById('weddingDisplay').style.display = 'flex';
         }
         
         function editDetails() {
-            const setupForm = document.getElementById('setupForm');
-            const weddingDisplay = document.getElementById('weddingDisplay');
-            
-            setupForm.style.display = 'flex';
-            weddingDisplay.style.display = 'none';
-            
-            console.log('Switched back to edit mode');
+            document.getElementById('setupForm').style.display = 'flex';
+            document.getElementById('weddingDisplay').style.display = 'none';
         }
         
         function loadSavedDetails() {
