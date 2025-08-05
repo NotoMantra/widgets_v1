@@ -17,8 +17,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
-            padding: 10px;
+            min-height: 144px;
+            height: 144px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
         
         .wedding-widget {
@@ -28,10 +31,12 @@
             border-radius: 12px;
             padding: 12px;
             box-shadow: 0 8px 25px rgba(251, 207, 232, 0.2);
-            width: 240px;
-            height: 144px;
+            width: 100%;
+            height: 100%;
+            max-width: 300px;
+            max-height: 144px;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -42,17 +47,12 @@
         .widget-bg::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(251, 207, 232, 0.1) 0%, transparent 70%);
-            animation: gentle-rotate 15s linear infinite;
-        }
-        
-        @keyframes gentle-rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(251, 207, 232, 0.05) 0%, transparent 70%);
+            pointer-events: none;
         }
         
         /* Setup Form Styles */
@@ -96,7 +96,6 @@
             outline: none;
             border-color: #ec4899;
             background: rgba(255, 255, 255, 1);
-            transform: scale(1.01);
         }
         
         .save-btn {
@@ -110,13 +109,12 @@
             font-weight: 600;
             cursor: pointer;
             font-family: 'Georgia', serif;
-            transition: all 0.3s ease;
+            transition: background 0.2s ease;
             margin-top: 2px;
         }
         
         .save-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+            background: linear-gradient(135deg, #db2777, #fbcfe8);
         }
         
         /* Wedding Display Styles */
@@ -172,38 +170,29 @@
         
         .heart-decoration {
             position: absolute;
-            font-size: 0.8rem;
-            color: rgba(251, 207, 232, 0.7);
-            animation: float-gentle 4s ease-in-out infinite;
+            font-size: 0.7rem;
+            color: rgba(251, 207, 232, 0.4);
+            animation: none;
         }
         
         .heart-decoration:nth-child(1) {
-            top: 10px;
-            left: 15px;
-            animation-delay: 0s;
+            top: 8px;
+            left: 12px;
         }
         
         .heart-decoration:nth-child(2) {
-            top: 15px;
-            right: 15px;
-            animation-delay: 1s;
+            top: 10px;
+            right: 12px;
         }
         
         .heart-decoration:nth-child(3) {
-            bottom: 10px;
-            left: 20px;
-            animation-delay: 2s;
+            bottom: 8px;
+            left: 15px;
         }
         
         .heart-decoration:nth-child(4) {
-            bottom: 15px;
-            right: 20px;
-            animation-delay: 3s;
-        }
-        
-        @keyframes float-gentle {
-            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
-            50% { transform: translateY(-3px) scale(1.1); opacity: 0.8; }
+            bottom: 10px;
+            right: 15px;
         }
         
         .edit-btn {
@@ -218,7 +207,7 @@
             color: #be185d;
             cursor: pointer;
             font-size: 0.6rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -227,7 +216,7 @@
         
         .edit-btn:hover {
             background: rgba(251, 207, 232, 0.6);
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
         
         .wedding-passed {
@@ -236,11 +225,6 @@
         
         .wedding-passed .countdown-text {
             color: #ec4899;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
@@ -357,9 +341,6 @@
             const weddingDisplay = document.getElementById('weddingDisplay');
             weddingDisplay.style.display = 'flex';
             
-            // Add entrance animation
-            weddingDisplay.style.animation = 'fadeIn 0.5s ease-in';
-            
             // Debug log
             console.log('Wedding display should now be visible with:', data);
         }
@@ -423,22 +404,9 @@
             }
         }
         
-        // Auto-update countdown every day
-        function startCountdownUpdater() {
-            setInterval(() => {
-                const instanceId = getInstanceId();
-                const saved = localStorage.getItem(`wedding_compact_${instanceId}`);
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    displayWedding(data);
-                }
-            }, 86400000); // Update every 24 hours
-        }
-        
         // Load saved details on page load
         window.addEventListener('load', () => {
             loadSavedDetails();
-            startCountdownUpdater();
         });
     </script>
 </body>
