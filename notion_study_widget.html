@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Overview Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            padding: 20px;
+        }
+
+        .dashboard-widget {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e5e5;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .date-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .orange-dot {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-radius: 50%;
+        }
+
+        .date-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d2d2d;
+        }
+
+        .weather {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+            color: #ff6b35;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            background: rgba(255, 107, 53, 0.08);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 107, 53, 0.15);
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .weather-icon {
+            font-size: 16px;
+        }
+
+        .study-goal {
+            margin-bottom: 18px;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            min-height: 20px;
+        }
+
+        .goal-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d2d2d;
+        }
+
+        .goal-time {
+            font-size: 12px;
+            color: #ff6b35;
+            font-weight: 500;
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .goal-time:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .goal-form {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .goal-form input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-container {
+            display: none;
+        }
+
+        .progress-bar {
+            display: none;
+        }
+
+        .progress-fill {
+            display: none;
+        }
+
+        .progress-text {
+            display: none;
+        }
+
+        .main-task {
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 18px;
+        }
+
+        .task-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #ff6b35;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-title {
+            font-size: 14px;
+            color: #2d2d2d;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .task-time {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .task-priority {
+            font-size: 11px;
+            background: rgba(255, 107, 53, 0.1);
+            color: #ff6b35;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .motivational-quote {
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .quote-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .quote-author {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            background: rgba(255, 107, 53, 0.05);
+            color: #ff6b35;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .stats-section {
+            background: rgba(255, 107, 53, 0.03);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 107, 53, 0.08);
+        }
+
+        .stats-title {
+            font-size: 11px;
+            color: #ff6b35;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .stats-label {
+            color: #666;
+        }
+
+        .stats-value {
+            color: #2d2d2d;
+            font-weight: 500;
+        }
+
+        /* Orange falling particles effect */
+        .particle {
+            position: fixed;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #ff6b35, #f7931e);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.6);
+            animation: fall 3s ease-out forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.2);
+            }
+            100% {
+                transform: translateY(120vh) translateX(var(--spread-x, 0)) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        .widget-container {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-widget">
+        <div class="widget-header">
+            <div class="date-section">
+                <div class="orange-dot"></div>
+                <div class="date-text" id="dateText">Today, Aug 8</div>
+            </div>
+            <div class="weather">
+                <span id="currentTime">--:--</span>
+            </div>
+        </div>
+        
+        <div class="study-goal">
+            <div class="goal-header">
+                <span class="goal-title">Study Goal</span>
+                <span class="goal-time" id="goalTime" onclick="showGoalForm()">Set daily goal</span>
+            </div>
+            <div class="goal-form" id="goalForm">
+                <input type="number" id="goalInput" placeholder="Hours (e.g., 2.5)" step="0.5" min="0.5" max="12">
+                <div style="display: flex; gap: 8px;">
+                    <button class="quick-btn" onclick="saveGoal()" style="flex: 1;">Save</button>
+                    <button class="quick-btn" onclick="cancelGoal()" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section" id="statsSection" style="display: none;">
+            <div class="stats-title">Today's Progress</div>
+            <div class="stats-row">
+                <span class="stats-label">Tasks Completed:</span>
+                <span class="stats-value" id="tasksCompleted">0</span>
+            </div>
+            <div class="stats-row">
+                <span class="stats-label">Study Sessions:</span>
+                <span class="stats-value" id="studySessions">0</span>
+            </div>
+            <div class="stats-row">
+                <span class="stats-label">Total Focus Time:</span>
+                <span class="stats-value" id="totalFocusTime">0h 0m</span>
+            </div>
+        </div>
+        
+        <div class="main-task">
+            <div class="task-header">Priority Task</div>
+            <div class="task-title" id="taskTitle">No tasks scheduled for today</div>
+            <div class="task-meta" id="taskMeta" style="display: none;">
+                <span class="task-time" id="taskTime">⏰ Due: --</span>
+                <span class="task-priority" id="taskPriority">--</span>
+            </div>
+            <div class="add-task" id="addTaskSection" style="margin-top: 8px;">
+                <button class="quick-btn" onclick="showTaskForm()" style="width: 100%;">+ Add Priority Task</button>
+            </div>
+            <div class="task-form" id="taskForm" style="display: none; margin-top: 8px;">
+                <input type="text" id="taskInput" placeholder="Enter your priority task..." style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
+                <div style="display: flex; gap: 8px;">
+                    <button class="quick-btn" onclick="saveTask()" style="flex: 1;">Save</button>
+                    <button class="quick-btn" onclick="cancelTask()" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="motivational-quote">
+            <div class="quote-text" id="quoteText">
+                "Success is the sum of small efforts repeated day in and day out."
+            </div>
+            <div class="quote-author">— Robert Collier</div>
+        </div>
+        
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="startStudySession()" id="startBtn">Start Session</button>
+            <button class="quick-btn" onclick="markTaskComplete()" id="completeBtn" style="display: none;">Mark Done</button>
+            <button class="quick-btn" onclick="clearAllData()" style="background: rgba(255, 0, 0, 0.05); border-color: rgba(255, 0, 0, 0.2); color: #dc2626;">Reset All</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA PERSISTENCE WITH LOCALSTORAGE =====
+        
+        function saveDataLocally() {
+            const data = {
+                currentTask: currentTask,
+                studyGoal: studyGoal,
+                dailyStats: dailyStats,
+                lastUpdated: Date.now(),
+                dateCreated: getCurrentDateString()
+            };
+            localStorage.setItem('studyPlannerData', JSON.stringify(data));
+            console.log('Data saved locally:', data);
+        }
+        
+        function loadDataLocally() {
+            try {
+                const saved = localStorage.getItem('studyPlannerData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    
+                    // Check if data is from today
+                    if (data.dateCreated === getCurrentDateString()) {
+                        return data;
+                    } else {
+                        // Data is from a previous day, reset daily stats but keep goals
+                        console.log('New day detected, resetting daily stats');
+                        const resetData = {
+                            currentTask: { 
+                                title: null, 
+                                isSet: false, 
+                                isStarted: false, 
+                                startTime: null, 
+                                status: 'not-set' 
+                            },
+                            studyGoal: data.studyGoal || { dailyHours: null, completedHours: 0 },
+                            dailyStats: { tasksCompleted: 0, studySessions: 0, totalFocusTime: 0 },
+                            lastUpdated: Date.now(),
+                            dateCreated: getCurrentDateString()
+                        };
+                        saveDataLocally();
+                        return resetData;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+            return null;
+        }
+        
+        function getCurrentDateString() {
+            return new Date().toDateString();
+        }
+        
+        // ===== GLOBAL STATE =====
+        let currentTask = {
+            title: null,
+            isSet: false,
+            isStarted: false,
+            startTime: null,
+            status: 'not-set' // 'not-set', 'ready', 'started', 'completed'
+        };
+        
+        let studyGoal = {
+            dailyHours: null,
+            completedHours: 0
+        };
+        
+        let dailyStats = {
+            tasksCompleted: 0,
+            studySessions: 0,
+            totalFocusTime: 0 // in minutes
+        };
+        
+        // ===== DATE AND TIME FUNCTIONS =====
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                month: 'short', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('en-US', options);
+            document.getElementById('dateText').textContent = dateString;
+        }
+        
+        function updateCurrentTime() {
+            try {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const timeString = `${hours}:${minutes}`;
+                
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            } catch (error) {
+                console.error('Error updating time:', error);
+            }
+        }
+        
+        // ===== MOTIVATIONAL QUOTES =====
+        const quotes = [
+            {
+                text: "Success is the sum of small efforts repeated day in and day out.",
+                author: "Robert Collier"
+            },
+            {
+                text: "The expert in anything was once a beginner.",
+                author: "Helen Hayes"
+            },
+            {
+                text: "Learning never exhausts the mind.",
+                author: "Leonardo da Vinci"
+            },
+            {
+                text: "Education is the most powerful weapon which you can use to change the world.",
+                author: "Nelson Mandela"
+            },
+            {
+                text: "The beautiful thing about learning is that nobody can take it away from you.",
+                author: "B.B. King"
+            }
+        ];
+        
+        function setRandomQuote() {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('quoteText').textContent = randomQuote.text;
+            document.querySelector('.quote-author').textContent = `— ${randomQuote.author}`;
+        }
+        
+        // ===== PARTICLE EFFECT =====
+        function createOrangeParticles(button) {
+            const rect = button.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                particle.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+                particle.style.animationDelay = Math.random() * 0.5 + 's';
+                particle.style.animationDuration = (Math.random() * 1.5 + 2.5) + 's';
+                
+                const spreadX = (Math.random() - 0.5) * 400;
+                particle.style.setProperty('--spread-x', spreadX + 'px');
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 4000);
+            }
+        }
+        
+        // ===== STUDY GOAL FUNCTIONS =====
+        function showGoalForm() {
+            document.getElementById('goalForm').style.display = 'block';
+            document.getElementById('goalInput').focus();
+            if (studyGoal.dailyHours) {
+                document.getElementById('goalInput').value = studyGoal.dailyHours;
+            }
+        }
+        
+        function cancelGoal() {
+            document.getElementById('goalForm').style.display = 'none';
+            document.getElementById('goalInput').value = '';
+        }
+        
+        function saveGoal() {
+            const hours = parseFloat(document.getElementById('goalInput').value);
+            if (!hours || hours <= 0) {
+                alert('Please enter a valid number of hours');
+                return;
+            }
+            
+            studyGoal.dailyHours = hours;
+            updateGoalDisplay();
+            cancelGoal();
+            saveDataLocally();
+            
+            const saveBtn = event.target;
+            createOrangeParticles(saveBtn);
+        }
+        
+        function updateGoalDisplay() {
+            const goalTimeEl = document.getElementById('goalTime');
+            if (studyGoal.dailyHours) {
+                const completedHours = Math.round(studyGoal.completedHours * 100) / 100;
+                goalTimeEl.textContent = `${completedHours}h / ${studyGoal.dailyHours}h`;
+            } else {
+                goalTimeEl.textContent = 'Set daily goal';
+            }
+        }
+        
+        // ===== TASK MANAGEMENT FUNCTIONS =====
+        function showTaskForm() {
+            document.getElementById('addTaskSection').style.display = 'none';
+            document.getElementById('taskForm').style.display = 'block';
+            document.getElementById('taskInput').focus();
+        }
+        
+        function cancelTask() {
+            document.getElementById('addTaskSection').style.display = 'block';
+            document.getElementById('taskForm').style.display = 'none';
+            document.getElementById('taskInput').value = '';
+        }
+        
+        function saveTask() {
+            const taskTitle = document.getElementById('taskInput').value.trim();
+            if (!taskTitle) {
+                alert('Please enter a task title');
+                return;
+            }
+            
+            const saveBtn = event.target;
+            createOrangeParticles(saveBtn);
+            
+            currentTask.title = taskTitle;
+            currentTask.isSet = true;
+            currentTask.status = 'ready';
+            
+            document.getElementById('taskTitle').textContent = taskTitle;
+            document.getElementById('taskTime').textContent = '⏰ Ready to start';
+            document.getElementById('taskPriority').textContent = 'Today';
+            document.getElementById('taskMeta').style.display = 'flex';
+            
+            document.getElementById('addTaskSection').style.display = 'none';
+            document.getElementById('taskForm').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('startBtn').textContent = 'Start Task';
+            document.getElementById('completeBtn').style.display = 'none';
+            
+            saveDataLocally();
+            console.log('Task set:', taskTitle);
+        }
+        
+        function startStudySession() {
+            if (!currentTask.isSet) {
+                alert('Please set a priority task first!');
+                return;
+            }
+            
+            const startBtn = document.getElementById('startBtn');
+            createOrangeParticles(startBtn);
+            
+            currentTask.isStarted = true;
+            currentTask.startTime = Date.now();
+            currentTask.status = 'started';
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('completeBtn').style.display = 'block';
+            document.getElementById('taskTime').textContent = '⏰ Working now...';
+            
+            dailyStats.studySessions++;
+            updateStatsDisplay();
+            saveDataLocally();
+            
+            console.log('Study session started for:', currentTask.title);
+        }
+        
+        function markTaskComplete() {
+            const completeBtn = document.getElementById('completeBtn');
+            createOrangeParticles(completeBtn);
+            
+            // Calculate focus time if task was started
+            if (currentTask.startTime) {
+                const focusTime = Math.round((Date.now() - currentTask.startTime) / 60000); // minutes
+                dailyStats.totalFocusTime += focusTime;
+                studyGoal.completedHours += focusTime / 60;
+            }
+            
+            currentTask.status = 'completed';
+            dailyStats.tasksCompleted++;
+            
+            document.getElementById('taskTitle').textContent = '✅ ' + currentTask.title;
+            document.getElementById('taskTime').textContent = '⏰ Completed!';
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('completeBtn').style.display = 'none';
+            
+            updateStatsDisplay();
+            updateGoalDisplay();
+            saveDataLocally();
+            
+            setTimeout(() => {
+                currentTask = { 
+                    title: null, 
+                    isSet: false, 
+                    isStarted: false, 
+                    startTime: null, 
+                    status: 'not-set' 
+                };
+                document.getElementById('taskTitle').textContent = 'No tasks scheduled for today';
+                document.getElementById('taskMeta').style.display = 'none';
+                document.getElementById('addTaskSection').style.display = 'block';
+                saveDataLocally();
+            }, 3000);
+            
+            console.log('Task completed!');
+        }
+        
+        // ===== STATS FUNCTIONS =====
+        function updateStatsDisplay() {
+            document.getElementById('tasksCompleted').textContent = dailyStats.tasksCompleted;
+            document.getElementById('studySessions').textContent = dailyStats.studySessions;
+            
+            const hours = Math.floor(dailyStats.totalFocusTime / 60);
+            const minutes = dailyStats.totalFocusTime % 60;
+            document.getElementById('totalFocusTime').textContent = `${hours}h ${minutes}m`;
+            
+            // Show stats section if there's any activity
+            if (dailyStats.tasksCompleted > 0 || dailyStats.studySessions > 0 || dailyStats.totalFocusTime > 0) {
+                document.getElementById('statsSection').style.display = 'block';
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                localStorage.removeItem('studyPlannerData');
+                
+                // Reset all state
+                currentTask = { 
+                    title: null, 
+                    isSet: false, 
+                    isStarted: false, 
+                    startTime: null, 
+                    status: 'not-set' 
+                };
+                studyGoal = { dailyHours: null, completedHours: 0 };
+                dailyStats = { tasksCompleted: 0, studySessions: 0, totalFocusTime: 0 };
+                
+                // Reset UI
+                document.getElementById('taskTitle').textContent = 'No tasks scheduled for today';
+                document.getElementById('taskMeta').style.display = 'none';
+                document.getElementById('addTaskSection').style.display = 'block';
+                document.getElementById('taskForm').style.display = 'none';
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('completeBtn').style.display = 'none';
+                document.getElementById('goalTime').textContent = 'Set daily goal';
+                document.getElementById('statsSection').style.display = 'none';
+                
+                console.log('All data cleared');
+            }
+        }
+        
+        // ===== RESTORATION FUNCTIONS =====
+        function restoreFromSavedData(data) {
+            if (!data) return;
+            
+            // Restore state
+            currentTask = data.currentTask || currentTask;
+            studyGoal = data.studyGoal || studyGoal;
+            dailyStats = data.dailyStats || dailyStats;
+            
+            // Restore UI
+            if (currentTask.isSet && currentTask.title) {
+                document.getElementById('taskTitle').textContent = currentTask.title;
+                document.getElementById('taskTime').textContent = 
+                    currentTask.status === 'started' ? '⏰ Working now...' :
+                    currentTask.status === 'completed' ? '⏰ Completed!' : '⏰ Ready to start';
+                document.getElementById('taskPriority').textContent = 'Today';
+                document.getElementById('taskMeta').style.display = 'flex';
+                document.getElementById('addTaskSection').style.display = 'none';
+                
+                if (currentTask.status === 'started') {
+                    document.getElementById('startBtn').style.display = 'none';
+                    document.getElementById('completeBtn').style.display = 'block';
+                } else if (currentTask.status === 'ready') {
+                    document.getElementById('startBtn').style.display = 'block';
+                    document.getElementById('startBtn').textContent = 'Start Task';
+                    document.getElementById('completeBtn').style.display = 'none';
+                }
+            }
+            
+            updateGoalDisplay();
+            updateStatsDisplay();
+            
+            console.log('Data restored:', data);
+        }
+        
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDate();
+            setRandomQuote();
+            
+            // Load saved data first
+            const savedData = loadDataLocally();
+            restoreFromSavedData(savedData);
+            
+            // Set up time display (update every minute instead of every second)
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000); // Update every minute
+            
+            // Hide start button until task is set (unless restored)
+            if (!currentTask.isSet) {
+                document.getElementById('startBtn').style.display = 'none';
+            }
+            
+            console.log('Widget initialized');
+        });
+        
+        // ===== AUTO-SAVE ON PAGE UNLOAD =====
+        window.addEventListener('beforeunload', () => {
+            saveDataLocally();
+        });
+    </script>
+</body>
+</html>
