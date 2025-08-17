@@ -87,16 +87,7 @@
             border: 3px solid #c9b395;
         }
 
-        .clock-number {
-            position: absolute;
-            font-size: 16px;
-            font-weight: 600;
-            color: #8b745f;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
-        }
+
 
         .hour-mark {
             position: absolute;
@@ -222,13 +213,6 @@
             .clock-container {
                 width: 160px;
                 height: 160px;
-            }
-            
-            .clock-number {
-                font-size: 14px;
-                width: 20px;
-                height: 20px;
-                line-height: 20px;
             }
             
             .hour-mark {
@@ -418,23 +402,6 @@
         // Create clock face
         function createClockFace() {
             const container = document.getElementById('clockContainer');
-            
-            // Add hour numbers
-            for (let i = 1; i <= 12; i++) {
-                const number = document.createElement('div');
-                number.className = 'clock-number';
-                number.textContent = i;
-                
-                const angle = ((i * 30) - 90) * (Math.PI / 180);
-                const radius = 75;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                
-                number.style.left = `calc(50% + ${x}px - 12px)`;
-                number.style.top = `calc(50% + ${y}px - 12px)`;
-                
-                container.appendChild(number);
-            }
             
             // Add hour marks
             for (let i = 0; i < 12; i++) {
