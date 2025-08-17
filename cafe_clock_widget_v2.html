@@ -240,9 +240,11 @@
                 height: 160px;
             }
             
-            .hour-hand { height: 48px; top: 32px; }
-            .minute-hand { height: 64px; top: 16px; }
-            .second-hand { height: 68px; top: 12px; }
+            .hour-number {
+                font-size: 12px;
+            }
+            
+            /* Hands automatically scale with percentage-based sizing */
         }
     </style>
 </head>
@@ -409,6 +411,7 @@
         // Initialize clock markers
         function createClockMarkers() {
             const clockFace = document.getElementById('clockFace');
+            const clockContainer = clockFace.parentElement;
             
             // Create hour markers
             for (let i = 1; i <= 12; i++) {
@@ -418,26 +421,29 @@
                 clockFace.appendChild(marker);
             }
             
-            // Create hour numbers
+            // Create hour numbers (positioned relative to container)
             for (let i = 1; i <= 12; i++) {
                 const number = document.createElement('div');
                 number.className = 'hour-number';
                 number.textContent = i;
                 
-                // Calculate position for each number
-                const angle = (i * 30 - 90) * (Math.PI / 180); // Convert to radians, offset by 90 degrees
-                const radius = 75; // Distance from center
-                const x = 100 + radius * Math.cos(angle); // Center is at 100px
-                const y = 100 + radius * Math.sin(angle);
+                // Calculate position relative to container size
+                const angle = (i * 30 - 90) * (Math.PI / 180);
+                const containerSize = 200; // Clock container size
+                const radius = containerSize * 0.375; // 75% of half container size
+                const centerOffset = containerSize / 2;
                 
-                number.style.left = `${x - 10}px`; // Offset by half width
-                number.style.top = `${y - 10}px`;  // Offset by half height
+                const x = centerOffset + radius * Math.cos(angle);
+                const y = centerOffset + radius * Math.sin(angle);
+                
+                number.style.left = `${x - 10}px`;
+                number.style.top = `${y - 10}px`;
                 clockFace.appendChild(number);
             }
             
             // Create minute markers
             for (let i = 1; i <= 60; i++) {
-                if (i % 5 !== 0) { // Skip positions where hour markers are
+                if (i % 5 !== 0) {
                     const marker = document.createElement('div');
                     marker.className = 'minute-marker';
                     marker.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
