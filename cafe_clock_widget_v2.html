@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Clock Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #f5f1eb 0%, #ede4d3 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cafe-widget {
+            background: linear-gradient(145deg, #faf8f3, #f0ebe0);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 8px 32px rgba(139, 116, 95, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(139, 116, 95, 0.1);
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cafe-widget::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 116, 95, 0.03) 0%, transparent 70%);
+            animation: gentle-pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.1; }
+        }
+
+        .widget-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cafe-header {
+            margin-bottom: 25px;
+        }
+
+        .cafe-title {
+            font-size: 20px;
+            color: #8b745f;
+            font-weight: 400;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .date-text {
+            font-size: 14px;
+            color: #a0906b;
+            font-style: italic;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: radial-gradient(circle, #f7f3ec 0%, #ede4d3 70%, #d4c4a8 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 0 20px rgba(139, 116, 95, 0.1),
+                0 4px 20px rgba(139, 116, 95, 0.2);
+            border: 3px solid #c9b395;
+        }
+
+        .clock-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .hour-marker {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: #8b745f;
+            top: 8px;
+            left: 50%;
+            transform-origin: 50% 92px;
+            transform: translateX(-50%);
+        }
+
+        .minute-marker {
+            position: absolute;
+            width: 1px;
+            height: 8px;
+            background: #a0906b;
+            top: 8px;
+            left: 50%;
+            transform-origin: 50% 92px;
+            transform: translateX(-50%);
+        }
+
+        .hour-number {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8b745f;
+            text-align: center;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            transform-origin: 50% 50%;
+        }
+
+        .clock-center {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #8b745f;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 0 2px #f7f3ec;
+        }
+
+        .hand {
+            position: absolute;
+            background: #8b745f;
+            transform-origin: 50% 100%;
+            border-radius: 2px;
+        }
+
+        .hour-hand {
+            width: 4px;
+            height: 60px;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+        }
+
+        .minute-hand {
+            width: 3px;
+            height: 80px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+        }
+
+        .second-hand {
+            width: 1px;
+            height: 85px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d4a574;
+            z-index: 5;
+        }
+
+        .quote-section {
+            background: rgba(212, 165, 116, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #d4a574;
+        }
+
+        .quote-text {
+            font-size: 14px;
+            color: #6d5d4f;
+            line-height: 1.5;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .quote-author {
+            font-size: 11px;
+            color: #8b745f;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .coffee-beans {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .bean {
+            width: 8px;
+            height: 12px;
+            background: linear-gradient(45deg, #8b745f, #a0906b);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0.6;
+            animation: bean-bounce 2s ease-in-out infinite;
+        }
+
+        .bean:nth-child(2) { animation-delay: 0.3s; }
+        .bean:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes bean-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.1); }
+        }
+
+        .loading {
+            color: #a0906b;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        @media (max-width: 480px) {
+            .cafe-widget {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .clock-container {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .hour-hand { height: 48px; top: 32px; }
+            .minute-hand { height: 64px; top: 16px; }
+            .second-hand { height: 68px; top: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cafe-widget">
+        <div class="widget-content">
+            <div class="cafe-header">
+                <h1 class="cafe-title" id="timeGreeting">☕ Good Morning! Rise & Grind ☕</h1>
+                <div class="date-text" id="dateText">Loading...</div>
+            </div>
+            
+            <div class="clock-container">
+                <div class="clock-face" id="clockFace">
+                    <!-- Hour markers will be generated by JavaScript -->
+                </div>
+                <div class="hand hour-hand" id="hourHand"></div>
+                <div class="hand minute-hand" id="minuteHand"></div>
+                <div class="hand second-hand" id="secondHand"></div>
+                <div class="clock-center"></div>
+            </div>
+            
+            <div class="coffee-beans">
+                <div class="bean"></div>
+                <div class="bean"></div>
+                <div class="bean"></div>
+            </div>
+            
+            <div class="quote-section">
+                <div class="quote-text" id="quoteText">Loading inspiration...</div>
+                <div class="quote-author" id="quoteAuthor">—</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cafe & restaurant themed motivational quotes with variety of items
+        const cafeQuotes = [
+            {
+                text: "Life is too short for bad coffee and missed opportunities. ☕✨",
+                author: "Anonymous"
+            },
+            {
+                text: "Coffee is a hug in a mug, and dreams are fuel for the soul. 🤗☕",
+                author: "Unknown"
+            },
+            {
+                text: "Good food, good mood, good life. 🍽️😊",
+                author: "Kitchen Wisdom"
+            },
+            {
+                text: "Tea time is me time - steep, sip, and reflect. 🍵🧘",
+                author: "Tea Philosophy"
+            },
+            {
+                text: "Fresh cookies make everything better. 🍪❤️",
+                author: "Baker's Truth"
+            },
+            {
+                text: "Sandwiches: the perfect handheld happiness. 🥪😄",
+                author: "Lunch Logic"
+            },
+            {
+                text: "Life happens, tea helps, cookies comfort. 🍵🍪",
+                author: "Daily Motto"
+            },
+            {
+                text: "Behind every successful day is a good breakfast. 🥐🌅",
+                author: "Morning Wisdom"
+            },
+            {
+                text: "Soup for the soul, bread for the heart. 🍲🍞",
+                author: "Comfort Food Philosophy"
+            },
+            {
+                text: "Sweet treats create sweet memories. 🧁💕",
+                author: "Dessert Wisdom"
+            },
+            {
+                text: "Fresh ingredients, fresh perspectives. 🥗🌿",
+                author: "Kitchen Philosophy"
+            },
+            {
+                text: "A slice of pie makes everything nice. 🥧✨",
+                author: "Pie Wisdom"
+            },
+            {
+                text: "Hot chocolate: liquid sunshine for cloudy days. 🍫☀️",
+                author: "Cozy Corner"
+            },
+            {
+                text: "Good food shared is love multiplied. 🍽️❤️",
+                author: "Community Kitchen"
+            },
+            {
+                text: "Pancakes: fluffy clouds of breakfast joy. 🥞☁️",
+                author: "Morning Magic"
+            }
+        ];
+
+        // Time-based greetings
+        function getTimeBasedGreeting() {
+            const hour = new Date().getHours();
+            
+            if (hour >= 5 && hour < 11) {
+                const morningGreetings = [
+                    "☕ Good Morning! Rise & Grind ☕",
+                    "🌅 Fresh Coffee & Pastries! 🥐",
+                    "🧇 Breakfast Bliss Awaits! 🧇",
+                    "🥐 Croissants & Coffee Time! ☕",
+                    "🥯 Bagels & Fresh Brew! 🥯",
+                    "🍳 Morning Treats Ready! 🍳",
+                    "🥞 Pancakes & Hot Coffee! ☕"
+                ];
+                return morningGreetings[Math.floor(Math.random() * morningGreetings.length)];
+            } else if (hour >= 11 && hour < 14) {
+                const lunchGreetings = [
+                    "🍽️ Hungry? It's Lunch Time! 🍽️",
+                    "🥪 Fresh Sandwiches & Soup! 🍲",
+                    "🌯 Wraps & Smoothies Ready! 🥤",
+                    "🍕 Pizza & Iced Tea! 🧊",
+                    "🥗 Fresh Salads & Paninis! 🥖",
+                    "🍜 Warm Soup & Bread! 🍞",
+                    "🌮 Tasty Lunch Combos! 🌮"
+                ];
+                return lunchGreetings[Math.floor(Math.random() * lunchGreetings.length)];
+            } else if (hour >= 14 && hour < 17) {
+                const afternoonGreetings = [
+                    "🍰 Afternoon Treats & Tea! 🍵",
+                    "🧁 Cupcakes & Cappuccino! ☕",
+                    "🍪 Fresh Cookies & Coffee! 🍪",
+                    "🍩 Donuts & Hot Chocolate! 🍫",
+                    "🥧 Pie Slice & Latte! ☕",
+                    "🍓 Berry Tarts & Tea! 🫖",
+                    "🍦 Ice Cream & Cold Brew! 🧊"
+                ];
+                return afternoonGreetings[Math.floor(Math.random() * afternoonGreetings.length)];
+            } else if (hour >= 17 && hour < 21) {
+                const eveningGreetings = [
+                    "🌆 Evening Bites & Wine! 🍷",
+                    "🍵 Herbal Tea & Scones! 🫖",
+                    "🥧 Dinner Specials Ready! 🍽️",
+                    "🍝 Pasta & Garlic Bread! 🧄",
+                    "🥘 Hearty Stews & Rolls! 🥖",
+                    "🧀 Cheese Boards & Tea! 🍵",
+                    "🍷 Wine & Light Bites! 🫒"
+                ];
+                return eveningGreetings[Math.floor(Math.random() * eveningGreetings.length)];
+            } else {
+                const nightGreetings = [
+                    "🌙 Late Night Comfort Food! 🌙",
+                    "☕ Decaf & Sweet Treats! 🍪",
+                    "🍪 Midnight Cookies & Milk! 🥛",
+                    "🌟 Cozy Night Snacks! 🥨",
+                    "🍫 Hot Chocolate & Marshmallows! 🤍",
+                    "🫖 Chamomile Tea & Biscuits! 🍪",
+                    "🍰 Night Owl Desserts! 🦉"
+                ];
+                return nightGreetings[Math.floor(Math.random() * nightGreetings.length)];
+            }
+        }
+
+        let userLocation = null;
+
+        // Initialize clock markers
+        function createClockMarkers() {
+            const clockFace = document.getElementById('clockFace');
+            
+            // Create hour markers
+            for (let i = 1; i <= 12; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'hour-marker';
+                marker.style.transform = `translateX(-50%) rotate(${i * 30}deg)`;
+                clockFace.appendChild(marker);
+            }
+            
+            // Create hour numbers
+            for (let i = 1; i <= 12; i++) {
+                const number = document.createElement('div');
+                number.className = 'hour-number';
+                number.textContent = i;
+                
+                // Calculate position for each number
+                const angle = (i * 30 - 90) * (Math.PI / 180); // Convert to radians, offset by 90 degrees
+                const radius = 75; // Distance from center
+                const x = 100 + radius * Math.cos(angle); // Center is at 100px
+                const y = 100 + radius * Math.sin(angle);
+                
+                number.style.left = `${x - 10}px`; // Offset by half width
+                number.style.top = `${y - 10}px`;  // Offset by half height
+                clockFace.appendChild(number);
+            }
+            
+            // Create minute markers
+            for (let i = 1; i <= 60; i++) {
+                if (i % 5 !== 0) { // Skip positions where hour markers are
+                    const marker = document.createElement('div');
+                    marker.className = 'minute-marker';
+                    marker.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
+                    clockFace.appendChild(marker);
+                }
+            }
+        }
+
+        // Update analog clock
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            // Calculate angles (subtract 90 degrees to align with 12 o'clock position)
+            const hourAngle = (hours * 30) + (minutes * 0.5) - 90;
+            const minuteAngle = (minutes * 6) - 90;
+            const secondAngle = (seconds * 6) - 90;
+
+            // Update hands
+            document.getElementById('hourHand').style.transform = 
+                `translateX(-50%) rotate(${hourAngle}deg)`;
+            document.getElementById('minuteHand').style.transform = 
+                `translateX(-50%) rotate(${minuteAngle}deg)`;
+            document.getElementById('secondHand').style.transform = 
+                `translateX(-50%) rotate(${secondAngle}deg)`;
+        }
+
+        // Update date display and greeting
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+            };
+            const dateString = now.toLocaleDateString('en-US', options);
+            document.getElementById('dateText').textContent = dateString;
+            document.getElementById('timeGreeting').textContent = getTimeBasedGreeting();
+        }
+
+        // Set random quote
+        function setRandomQuote() {
+            const randomQuote = cafeQuotes[Math.floor(Math.random() * cafeQuotes.length)];
+            document.getElementById('quoteText').textContent = randomQuote.text;
+            document.getElementById('quoteAuthor').textContent = `— ${randomQuote.author}`;
+        }
+
+        // Initialize everything
+        function init() {
+            createClockMarkers();
+            updateClock();
+            updateDate();
+            setRandomQuote();
+            
+            // Update clock every second
+            setInterval(updateClock, 1000);
+            
+            // Update date and greeting every minute
+            setInterval(updateDate, 60000);
+            
+            // Update quote every 30 minutes
+            setInterval(setRandomQuote, 30 * 60 * 1000);
+        }
+
+        // Start when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
