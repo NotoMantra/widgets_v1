@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Serenity Spa Clock Widget</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Cormorant Garamond','Georgia','Times New Roman',serif;
+      background:linear-gradient(135deg,#FAF7F3 0%,#F5E6D3 100%);
+      padding:20px;min-height:100vh;display:flex;align-items:center;justify-content:center
+    }
+    .spa-widget{
+      background:linear-gradient(145deg,#FAF7F3,#F5E6D3);
+      border-radius:20px;padding:20px;
+      box-shadow:0 8px 32px rgba(185,138,100,.12), inset 0 1px 0 rgba(255,255,255,.9);
+      border:1px solid rgba(201,168,124,.15);max-width:400px;text-align:center;position:relative;overflow:hidden
+    }
+    .spa-widget::before{
+      content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+      background:radial-gradient(circle,rgba(201,168,124,.04) 0%,transparent 70%);
+      animation:gentle-pulse 10s cubic-bezier(0.4, 0, 0.2, 1) infinite
+    }
+    @keyframes gentle-pulse{0%,100%{transform:scale(1) rotate(0);opacity:.3}50%{transform:scale(1.1) rotate(180deg);opacity:.08}}
+    .widget-content{position:relative;z-index:2}
+    .spa-header{margin-bottom:12px;text-align:center}
+    .spa-title{font-size:20px;color:#C9A87C;font-weight:400;margin-bottom:6px;line-height:1.3;letter-spacing:0.5px;text-align:center}
+    .date-text{font-size:14px;color:#B48A64;font-style:italic;text-align:center}
+    .timezone-selector{margin-top:6px;text-align:center;display:flex;flex-direction:column;align-items:center}
+    .timezone-selector select{
+      background:rgba(201,168,124,.1);border:1px solid rgba(201,168,124,.3);
+      border-radius:6px;padding:4px 8px;font-size:11px;color:#B48A64;font-family:inherit;cursor:pointer;transition:.3s ease
+    }
+    .timezone-selector select:hover{background:rgba(201,168,124,.15);border-color:rgba(201,168,124,.5)}
+    .timezone-selector select:focus{outline:none;border-color:#C9A87C;box-shadow:0 0 0 2px rgba(201,168,124,.2)}
+    .sync-status{font-size:10px;color:#B48A64;margin-top:3px;text-align:center;transition:color .3s ease}
+
+    .clock-container{
+      position:relative;width:200px;height:200px;
+      margin:10px auto 16px;
+      background:radial-gradient(circle,#FAF7F3 0%,#F5E6D3 70%,#E8D0B8 100%);
+      border-radius:50%;box-shadow:inset 0 0 20px rgba(201,168,124,.12),0 4px 20px rgba(201,168,124,.15);
+      border:3px solid #C9A87C
+    }
+
+    .hour-mark,.minute-mark{position:absolute;left:50%;background:#C9A87C}
+    .minute-mark{background:#B48A64;opacity:0.6}
+    .clock-hand{
+      position:absolute !important;background:#B48A64 !important;border-radius:2px !important;
+      transform-origin:50% 100% !important;left:50% !important;transition:none !important;
+      clip-path:polygon(40% 0%, 60% 0%, 55% 100%, 45% 100%) !important
+    }
+    .second-hand{
+      background:#C9A87C !important;opacity:0.9;
+      box-shadow:0 0 8px rgba(201,168,124,.4), 0 0 12px rgba(201,168,124,.2);
+      filter:drop-shadow(0 2px 4px rgba(201,168,124,.3));
+      animation:subtle-glow 2s ease-in-out infinite
+    }
+    @keyframes subtle-glow{0%,100%{filter:drop-shadow(0 2px 4px rgba(201,168,124,.3))}50%{filter:drop-shadow(0 2px 6px rgba(201,168,124,.5))}}
+    .clock-center{
+      position:absolute;width:12px;height:12px;background:#B48A64;border-radius:50%;
+      top:50%;left:50%;margin:-6px 0 0 -6px;z-index:10;box-shadow:0 0 0 2px #FAF7F3
+    }
+    
+    .inner-ring{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:82%;height:82%;border-radius:50%;
+      border:1px solid rgba(201,168,124,.15);
+      box-shadow:inset 0 0 15px rgba(201,168,124,.08);
+      pointer-events:none;z-index:1
+    }
+
+    .spa-elements{display:flex;justify-content:center;gap:12px;margin:12px 0;font-size:20px}
+    .lotus{
+      animation:gentle-float 3s ease-in-out infinite;
+      filter:drop-shadow(0 2px 4px rgba(201,168,124,.2))
+    }
+    .lotus:nth-child(2){animation-delay:.6s}.lotus:nth-child(3){animation-delay:1.2s}
+    @keyframes gentle-float{0%,100%{transform:translateY(0) scale(1);opacity:.7}50%{transform:translateY(-6px) scale(1.05);opacity:1}}
+    
+    .quote-section{
+      background:rgba(232,208,184,.15);border-radius:12px;padding:16px;margin:8px 0 0;
+      border-left:4px solid #C9A87C
+    }
+    .quote-text{font-size:14px;color:#B48A64;line-height:1.6;font-style:italic;margin-bottom:8px}
+    .quote-author{font-size:11px;color:#B48A64;font-weight:600;text-align:right}
+
+    .service-hours{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(201,168,124,.12);border-radius:8px;padding:6px 12px;
+      font-size:12px;margin-top:6px;border:1px solid rgba(201,168,124,.2);
+      transition:all .3s ease;text-align:center
+    }
+    .service-hours.open{background:rgba(201,168,124,.15);border-color:#C9A87C}
+    .service-hours.closing-soon{background:rgba(232,208,184,.2);border-color:#C9A87C}
+    .service-hours.closed{background:rgba(180,138,100,.08);border-color:rgba(180,138,100,.2)}
+    .status-icon{font-size:14px}
+    .status-text{color:#B48A64;font-weight:500}
+
+    .timezone-controls{display:flex;align-items:center;gap:8px;justify-content:center}
+    .settings-btn{
+      background:rgba(201,168,124,.15);border:1px solid rgba(201,168,124,.3);
+      border-radius:50%;width:32px;height:32px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:16px;transition:all .3s ease;
+      box-shadow:0 2px 6px rgba(201,168,124,.12)
+    }
+    .settings-btn:hover{
+      background:rgba(201,168,124,.25);border-color:#C9A87C;
+      transform:scale(1.08) rotate(90deg);box-shadow:0 3px 10px rgba(201,168,124,.2)
+    }
+    .settings-btn:active{transform:scale(0.95) rotate(90deg)}
+
+    .settings-modal{
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(180,138,100,.3);backdrop-filter:blur(4px);
+      z-index:1000;align-items:center;justify-content:center
+    }
+    .settings-modal.active{display:flex}
+    .settings-panel{
+      background:#FAF7F3;border-radius:16px;padding:24px;
+      max-width:500px;width:90%;max-height:80vh;overflow-y:auto;
+      box-shadow:0 8px 32px rgba(180,138,100,.25);
+      border:1px solid rgba(201,168,124,.2)
+    }
+    .settings-header{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:20px;border-bottom:2px solid #E8D0B8;padding-bottom:12px
+    }
+    .settings-title{font-size:20px;color:#C9A87C;font-weight:600}
+    .close-btn{
+      background:none;border:none;font-size:24px;cursor:pointer;
+      color:#B48A64;transition:.2s;padding:0;width:32px;height:32px;
+      display:flex;align-items:center;justify-content:center;border-radius:50%
+    }
+    .close-btn:hover{background:rgba(201,168,124,.15);transform:rotate(90deg)}
+    .day-config{margin-bottom:16px;padding:12px;background:rgba(232,208,184,.1);border-radius:8px}
+    .day-label{
+      font-size:14px;color:#C9A87C;font-weight:600;margin-bottom:8px;
+      display:flex;align-items:center;gap:8px
+    }
+    .day-label input[type="checkbox"]{
+      width:18px;height:18px;cursor:pointer;accent-color:#C9A87C
+    }
+    .time-inputs{display:flex;gap:12px;align-items:center}
+    .time-inputs label{font-size:12px;color:#B48A64}
+    .time-inputs input[type="time"]{
+      padding:6px 8px;border:1px solid rgba(201,168,124,.3);
+      border-radius:6px;background:#FAF7F3;color:#B48A64;
+      font-family:inherit;font-size:13px;transition:.2s
+    }
+    .time-inputs input[type="time"]:focus{
+      outline:none;border-color:#C9A87C;box-shadow:0 0 0 2px rgba(201,168,124,.2)
+    }
+    .time-inputs input[type="time"]:disabled{opacity:.4;cursor:not-allowed}
+    .save-btn{
+      width:100%;padding:12px;background:#C9A87C;color:#FAF7F3;
+      border:none;border-radius:8px;font-size:14px;font-weight:600;
+      cursor:pointer;transition:.3s;margin-top:16px;font-family:inherit
+    }
+    .save-btn:hover{background:#B48A64;transform:translateY(-2px);box-shadow:0 4px 12px rgba(201,168,124,.3)}
+    .save-btn:active{transform:translateY(0)}
+
+    @media (max-width:480px){
+      .spa-widget{padding:16px;margin:10px}
+      .clock-container{width:160px;height:160px}
+      .settings-panel{padding:20px;width:95%}
+      .settings-btn{width:28px;height:28px;font-size:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="spa-widget">
+    <div class="widget-content">
+      <div class="spa-header">
+        <h1 class="spa-title" id="timeGreeting">🌸 Good Morning! Time to Glow 🌸</h1>
+        <div class="date-text" id="dateText">Loading...</div>
+
+        <div class="timezone-selector">
+          <div class="timezone-controls">
+            <select id="timezoneSelect">
+              <option value="auto">Auto (Device Time)</option>
+              <option value="America/New_York">New York (ET)</option>
+              <option value="America/Los_Angeles">Los Angeles (PT)</option>
+              <option value="Europe/London">London (UK)</option>
+              <option value="Europe/Paris">Paris (FR)</option>
+              <option value="Asia/Kolkata">India (IST)</option>
+              <option value="Asia/Dubai">Dubai (GST)</option>
+              <option value="Asia/Tokyo">Tokyo (JST)</option>
+              <option value="Australia/Sydney">Sydney (AET)</option>
+            </select>
+            <button class="settings-btn" id="settingsBtn" title="Configure Service Hours">⚙️</button>
+          </div>
+          <div class="sync-status" id="syncStatus">🌐 Syncing with network time…</div>
+        </div>
+        
+        <div class="service-hours" id="serviceHours">
+          <span class="status-icon" id="statusIcon">⏰</span>
+          <span class="status-text" id="statusText">Checking hours...</span>
+        </div>
+      </div>
+
+      <div class="clock-container" id="clockContainer">
+        <div class="inner-ring"></div>
+        <div class="clock-hand hour-hand" id="hourHand"></div>
+        <div class="clock-hand minute-hand" id="minuteHand"></div>
+        <div class="clock-hand second-hand" id="secondHand"></div>
+        <div class="clock-center"></div>
+      </div>
+
+      <div class="spa-elements"><div class="lotus">🪷</div><div class="lotus">🪷</div><div class="lotus">🪷</div></div>
+
+      <div class="quote-section">
+        <div class="quote-text" id="quoteText">Loading inspiration...</div>
+        <div class="quote-author" id="quoteAuthor">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h2 class="settings-title">⏰ Configure Service Hours</h2>
+        <button class="close-btn" id="closeSettingsBtn">×</button>
+      </div>
+      <div id="dayConfigs"></div>
+      <button class="save-btn" id="saveHoursBtn">💾 Save Hours</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== Spa & Wellness Quotes =====
+    const spaQuotes = [
+      { text: "Self-care is not selfish, it's essential. 💆‍♀️✨", author: "Wellness Wisdom" },
+      { text: "Take time to make your soul happy. 🌸💫", author: "Inner Peace" },
+      { text: "Relaxation is not a luxury, it's a necessity. 🕯️", author: "Spa Philosophy" },
+      { text: "Beautiful skin requires commitment, not a miracle. 💅", author: "Beauty Truth" },
+      { text: "Invest in your skin, you're going to wear it every day. ✨", author: "Skincare Wisdom" },
+      { text: "Wellness is the complete integration of body, mind, and spirit. 🧘‍♀️", author: "Holistic Health" },
+      { text: "Your body deserves the best care. Treat it with kindness. 💕", author: "Self-Love" },
+      { text: "Glow from within and let your beauty shine. 🌟", author: "Inner Beauty" },
+      { text: "Taking care of yourself is productive. 🌺", author: "Modern Wellness" },
+      { text: "Calm mind brings inner strength and confidence. 🕊️", author: "Mindful Living" },
+      { text: "Nourish your body, it's the only place you have to live. 🌿", author: "Health First" },
+      { text: "Peace begins with a smile and a moment of stillness. 😌", author: "Tranquility" },
+      { text: "Beauty is being the best possible version of yourself. 💫", author: "True Beauty" },
+      { text: "Rest and self-care are so important. You cannot serve from an empty vessel. 🫖", author: "Self-Care Mantra" },
+      { text: "Breathe deeply, let go of stress, and embrace serenity. 🌸", author: "Zen Living" }
+    ];
+
+    // ===== Service Hours Configuration =====
+    // Default hours (used if nothing in localStorage)
+    const defaultServiceHours = {
+      monday:    { enabled: true, open: '09:00', close: '20:00' },
+      tuesday:   { enabled: true, open: '09:00', close: '20:00' },
+      wednesday: { enabled: true, open: '09:00', close: '20:00' },
+      thursday:  { enabled: true, open: '09:00', close: '20:00' },
+      friday:    { enabled: true, open: '09:00', close: '20:00' },
+      saturday:  { enabled: true, open: '10:00', close: '18:00' },
+      sunday:    { enabled: true, open: '10:00', close: '18:00' }
+    };
+
+    // Load hours from localStorage or use defaults
+    function loadServiceHours() {
+      const saved = localStorage.getItem('spaServiceHours');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return defaultServiceHours;
+        }
+      }
+      return defaultServiceHours;
+    }
+
+    // Save hours to localStorage
+    function saveServiceHours(hours) {
+      localStorage.setItem('spaServiceHours', JSON.stringify(hours));
+    }
+
+    let serviceHours = loadServiceHours();
+
+    // ===== Config =====
+    const urlTZ = new URLSearchParams(location.search).get('tz');
+    let selectedTimezone = urlTZ || 'auto';
+    const RESYNC_MIN = 10;
+    const MAX_TRUSTED_SKEW_MS = 2 * 60 * 1000;
+
+    // ===== Accurate time via network =====
+    let serverOffsetMs = 0;
+    let lastSyncOK = false;
+    let lastSyncAt = null;
+
+    async function syncAccurateTime() {
+      try {
+        const t0 = performance.now();
+        const res = await fetch(`./?_t=${Date.now()}`, { method: 'HEAD', cache: 'no-store' });
+        const t1 = performance.now();
+        const dateHdr = res.headers.get('Date');
+        if (dateHdr) {
+          const baseMs  = new Date(dateHdr).getTime();
+          const halfRTT = Math.round((t1 - t0) / 2);
+          const estNow  = baseMs + halfRTT;
+          serverOffsetMs = estNow - Date.now();
+
+          if (Math.abs(serverOffsetMs) > MAX_TRUSTED_SKEW_MS) {
+            serverOffsetMs = 0;
+            lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+            return;
+          }
+
+          lastSyncOK = true; lastSyncAt = new Date(); updateSyncStatus();
+          return;
+        }
+      } catch {}
+
+      // Fallback: WorldTimeAPI
+      try {
+        const t0 = performance.now();
+        const r = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { cache: 'no-store' });
+        const t1 = performance.now();
+        if (r.ok) {
+          const j = await r.json();
+          if (j && typeof j.unixtime === 'number') {
+            const halfRTT = Math.round((t1 - t0) / 2);
+            const estUtcMs = j.unixtime * 1000 + halfRTT;
+            serverOffsetMs = estUtcMs - Date.now();
+
+            if (Math.abs(serverOffsetMs) > MAX_TRUSTED_SKEW_MS) {
+              serverOffsetMs = 0;
+              lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+              return;
+            }
+
+            lastSyncOK = true; lastSyncAt = new Date(); updateSyncStatus();
+            return;
+          }
+        }
+      } catch {}
+
+      serverOffsetMs = 0; lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+    }
+    const nowAccurate = () => new Date(Date.now() + serverOffsetMs);
+
+    // ===== TZ helpers =====
+    function getPartsForTZ(tz) {
+      const d = nowAccurate();
+      if (tz === 'auto') return { h24:d.getHours(), m:d.getMinutes(), s:d.getSeconds(), date:d };
+      try {
+        const parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: tz, hour:'numeric', minute:'numeric', second:'numeric', hour12:false
+        }).formatToParts(d);
+        const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        return { h24:+map.hour, m:+map.minute, s:+map.second, date:d };
+      } catch { return { h24:d.getHours(), m:d.getMinutes(), s:d.getSeconds(), date:d }; }
+    }
+    function formatDateForTZ(tz) {
+      const d = nowAccurate();
+      try {
+        return new Intl.DateTimeFormat('en-US', {
+          timeZone: tz === 'auto' ? undefined : tz,
+          weekday:'long', year:'numeric', month:'long', day:'numeric'
+        }).format(d);
+      } catch {
+        return d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      }
+    }
+    function formatTimeForTZ(tz) {
+      const d = nowAccurate();
+      try {
+        return new Intl.DateTimeFormat('en-US', {
+          timeZone: tz === 'auto' ? undefined : tz,
+          hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true
+        }).format(d);
+      } catch { return d.toLocaleTimeString('en-US'); }
+    }
+
+    // ===== Spa-themed Greeting (sticky per time block) =====
+    let lastGreetingBlock = null;
+    let lastGreetingText = "🌸 Good Morning! Time to Glow 🌸";
+
+    function getTimeBlock(h24){
+      if (h24 >= 5 && h24 < 11) return 'morning';
+      if (h24 >= 11 && h24 < 14) return 'lunch';
+      if (h24 >= 14 && h24 < 17) return 'afternoon';
+      if (h24 >= 17 && h24 < 21) return 'evening';
+      return 'night';
+    }
+
+    function getTimeBasedGreeting() {
+      const { h24 } = getPartsForTZ(selectedTimezone);
+      const block = getTimeBlock(h24);
+
+      if (block === lastGreetingBlock) {
+        return lastGreetingText;
+      }
+
+      let a;
+      if (block === 'morning') {
+        a = [
+          "☀️ Good Morning ☀️",
+          "🌸 Time to Glow 🌸",
+          "🧖‍♀️ Morning Ritual 🧖‍♀️",
+          "🌅 Rise & Shine 🌅",
+          "💆‍♀️ Fresh Start 💆‍♀️",
+          "🌺 Morning Bliss 🌺",
+          "✨ Awaken & Glow ✨"
+        ];
+      } else if (block === 'lunch') {
+        a = [
+          "💆‍♀️ Midday Break 💆‍♀️",
+          "🧘‍♀️ Refresh Time 🧘‍♀️",
+          "🌺 Lunch Pamper 🌺",
+          "✨ Balance Hour ✨",
+          "🪷 Midday Glow 🪷",
+          "💅 Beauty Break 💅",
+          "🌸 Rejuvenate 🌸"
+        ];
+      } else if (block === 'afternoon') {
+        a = [
+          "💅 Beauty Hour 💅",
+          "🕯️ Tea & Peace 🕯️",
+          "🌸 Glow Up Time 🌸",
+          "✨ Pamper Hour ✨",
+          "🧖‍♀️ Self-Care 🧖‍♀️",
+          "🪷 Treat Time 🪷",
+          "💆‍♀️ Relax Now 💆‍♀️"
+        ];
+      } else if (block === 'evening') {
+        a = [
+          "🌙 Evening Calm 🌙",
+          "🕯️ Unwind Time 🕯️",
+          "💫 Night Care 💫",
+          "🧘‍♀️ Serenity 🧘‍♀️",
+          "🌸 Wind Down 🌸",
+          "✨ Evening Spa ✨",
+          "🪷 Peace Time 🪷"
+        ];
+      } else {
+        a = [
+          "🌟 Night Pamper 🌟",
+          "🛁 Soak & Rest 🛁",
+          "💤 Beauty Sleep 💤",
+          "🌙 Night Ritual 🌙",
+          "✨ Rest Well ✨",
+          "🕯️ Dream Time 🕯️",
+          "💫 Sweet Dreams 💫"
+        ];
+      }
+
+      lastGreetingBlock = block;
+      lastGreetingText = a[Math.floor(Math.random() * a.length)];
+      return lastGreetingText;
+    }
+
+    // ===== Service Hours Check =====
+    function updateServiceHours() {
+      const { h24, m } = getPartsForTZ(selectedTimezone);
+      const d = nowAccurate();
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      
+      let dayIndex;
+      if (selectedTimezone === 'auto') {
+        dayIndex = d.getDay();
+      } else {
+        try {
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: selectedTimezone,
+            weekday: 'long'
+          });
+          const dayName = formatter.format(d).toLowerCase();
+          dayIndex = dayNames.indexOf(dayName);
+        } catch {
+          dayIndex = d.getDay();
+        }
+      }
+      
+      const day = dayNames[dayIndex];
+      const hours = serviceHours[day];
+      
+      if (!hours || !hours.enabled) {
+        const statusEl = document.getElementById('serviceHours');
+        statusEl.className = 'service-hours closed';
+        document.getElementById('statusIcon').textContent = '🌙';
+        document.getElementById('statusText').textContent = 'Closed Today';
+        statusEl.style.display = 'inline-flex';
+        return;
+      }
+
+      const currentMinutes = h24 * 60 + m;
+      const [openH, openM] = hours.open.split(':').map(Number);
+      const [closeH, closeM] = hours.close.split(':').map(Number);
+      const openMinutes = openH * 60 + openM;
+      const closeMinutes = closeH * 60 + closeM;
+
+      const statusEl = document.getElementById('serviceHours');
+      const iconEl = document.getElementById('statusIcon');
+      const textEl = document.getElementById('statusText');
+
+      statusEl.style.display = 'inline-flex';
+
+      if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+        // Calculate time until closing
+        const minutesUntilClose = closeMinutes - currentMinutes;
+        const closeTime = formatTime12(closeH, closeM);
+
+        if (minutesUntilClose <= 30) {
+          // 30 minutes or less warning
+          statusEl.className = 'service-hours closing-soon';
+          iconEl.textContent = '⚠️';
+          textEl.textContent = `Closes ${closeTime} • ${minutesUntilClose}min`;
+        } else if (minutesUntilClose <= 60) {
+          // 1 hour warning
+          statusEl.className = 'service-hours closing-soon';
+          iconEl.textContent = '⏰';
+          textEl.textContent = `Closes ${closeTime} • 1 hour`;
+        } else {
+          // Normal open state
+          statusEl.className = 'service-hours open';
+          iconEl.textContent = '✨';
+          textEl.textContent = "We're Open!";
+        }
+      } else {
+        // Closed
+        statusEl.className = 'service-hours closed';
+        iconEl.textContent = '🌙';
+        
+        if (currentMinutes < openMinutes) {
+          // Before opening today
+          const openTime = formatTime12(openH, openM);
+          textEl.textContent = `Opens ${openTime}`;
+        } else {
+          // After closing today - find next opening
+          let nextDayIndex = (dayIndex + 1) % 7;
+          let daysChecked = 0;
+          
+          while (daysChecked < 7) {
+            const nextDay = dayNames[nextDayIndex];
+            const nextHours = serviceHours[nextDay];
+            
+            if (nextHours && nextHours.enabled) {
+              const [nextOpenH, nextOpenM] = nextHours.open.split(':').map(Number);
+              const nextOpenTime = formatTime12(nextOpenH, nextOpenM);
+              const dayLabel = nextDayIndex === (dayIndex + 1) % 7 ? 'tomorrow' : 
+                              nextDay.charAt(0).toUpperCase() + nextDay.slice(1, 3);
+              textEl.textContent = `Opens ${dayLabel} ${nextOpenTime}`;
+              break;
+            }
+            
+            nextDayIndex = (nextDayIndex + 1) % 7;
+            daysChecked++;
+          }
+          
+          if (daysChecked === 7) {
+            textEl.textContent = 'Closed';
+          }
+        }
+      }
+    }
+
+    function formatTime12(h, m) {
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      const mStr = m.toString().padStart(2, '0');
+      return `${h12}:${mStr} ${period}`;
+    }
+
+    // ===== Settings UI =====
+    function buildSettingsUI() {
+      const container = document.getElementById('dayConfigs');
+      const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      
+      container.innerHTML = '';
+      
+      dayNames.forEach((day, index) => {
+        const config = serviceHours[day];
+        const div = document.createElement('div');
+        div.className = 'day-config';
+        div.innerHTML = `
+          <div class="day-label">
+            <input type="checkbox" id="enable-${day}" ${config.enabled ? 'checked' : ''}>
+            <label for="enable-${day}" style="cursor:pointer;flex:1">${dayLabels[index]}</label>
+          </div>
+          <div class="time-inputs">
+            <label>Open: <input type="time" id="open-${day}" value="${config.open}" ${!config.enabled ? 'disabled' : ''}></label>
+            <label>Close: <input type="time" id="close-${day}" value="${config.close}" ${!config.enabled ? 'disabled' : ''}></label>
+          </div>
+        `;
+        container.appendChild(div);
+        
+        // Enable/disable time inputs based on checkbox
+        const checkbox = div.querySelector(`#enable-${day}`);
+        const openInput = div.querySelector(`#open-${day}`);
+        const closeInput = div.querySelector(`#close-${day}`);
+        
+        checkbox.addEventListener('change', () => {
+          openInput.disabled = !checkbox.checked;
+          closeInput.disabled = !checkbox.checked;
+        });
+      });
+    }
+
+    function openSettings() {
+      buildSettingsUI();
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    function saveHours() {
+      const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const newHours = {};
+      
+      dayNames.forEach(day => {
+        const enabled = document.getElementById(`enable-${day}`).checked;
+        const open = document.getElementById(`open-${day}`).value;
+        const close = document.getElementById(`close-${day}`).value;
+        
+        newHours[day] = { enabled, open, close };
+      });
+      
+      serviceHours = newHours;
+      saveServiceHours(newHours);
+      updateServiceHours();
+      closeSettings();
+    }
+
+    // ===== Clock face =====
+    function createClockFace() {
+      const container = document.getElementById('clockContainer');
+      for (let i=0;i<12;i++){
+        const mark=document.createElement('div');
+        mark.className='hour-mark';
+        mark.style.transform=`rotate(${i*30}deg)`;
+        container.appendChild(mark);
+      }
+      for (let i=0;i<60;i++){
+        if (i%5!==0){
+          const mark=document.createElement('div');
+          mark.className='minute-mark';
+          mark.style.transform=`rotate(${i*6}deg)`;
+          container.appendChild(mark);
+        }
+      }
+    }
+
+    // ===== Responsive geometry =====
+    function layoutDial() {
+      const box = document.getElementById('clockContainer');
+      const size = Math.min(box.clientWidth, box.clientHeight);
+      const R = size/2;
+
+      const lenHour = Math.round(size * 0.30);
+      const lenMin  = Math.round(size * 0.40);
+      const lenSec  = Math.round(size * 0.425);
+
+      const wHour = Math.max(2, Math.round(size * 0.03));
+      const wMin  = Math.max(2, Math.round(size * 0.02));
+      const wSec  = Math.max(1, Math.round(size * 0.01));
+
+      const hourHand = document.getElementById('hourHand');
+      const minuteHand = document.getElementById('minuteHand');
+      const secondHand = document.getElementById('secondHand');
+
+      hourHand.style.height = `${lenHour}px`;
+      hourHand.style.top = `${R - lenHour}px`;
+      hourHand.style.width = `${wHour}px`;
+      hourHand.style.marginLeft = `${-wHour/2}px`;
+      hourHand.style.zIndex = 3;
+
+      minuteHand.style.height = `${lenMin}px`;
+      minuteHand.style.top = `${R - lenMin}px`;
+      minuteHand.style.width = `${wMin}px`;
+      minuteHand.style.marginLeft = `${-wMin/2}px`;
+      minuteHand.style.zIndex = 4;
+
+      secondHand.style.height = `${lenSec}px`;
+      secondHand.style.top = `${R - lenSec}px`;
+      secondHand.style.width = `${wSec}px`;
+      secondHand.style.marginLeft = `${-wSec/2}px`;
+      secondHand.style.zIndex = 5;
+
+      const hourMarks = box.querySelectorAll('.hour-mark');
+      const minuteMarks = box.querySelectorAll('.minute-mark');
+
+      const hourMarkH = Math.max(6, Math.round(size * 0.075));
+      const minMarkH  = Math.max(3, Math.round(size * 0.04));
+      const hourTop   = Math.round(size * 0.05);
+      const minTop    = Math.round(size * 0.07);
+      const hourOrigin= (R * 0.90);
+      const minOrigin = (R * 0.86);
+
+      hourMarks.forEach(m=>{
+        m.style.width = '2px';
+        m.style.height = `${hourMarkH}px`;
+        m.style.top = `${hourTop}px`;
+        m.style.marginLeft = '-1px';
+        m.style.transformOrigin = `50% ${hourOrigin}px`;
+      });
+      minuteMarks.forEach(m=>{
+        m.style.width = '1px';
+        m.style.height = `${minMarkH}px`;
+        m.style.top = `${minTop}px`;
+        m.style.marginLeft = '-0.5px';
+        m.style.transformOrigin = `50% ${minOrigin}px`;
+      });
+    }
+
+    let ro;
+    function watchResize() {
+      const box = document.getElementById('clockContainer');
+      if (ro) ro.disconnect();
+      ro = new ResizeObserver(() => { layoutDial(); updateClock(); });
+      ro.observe(box);
+    }
+
+    // ===== Rendering =====
+    function updateClock() {
+      const { h24, m, s } = getPartsForTZ(selectedTimezone);
+      const h12 = h24 % 12;
+
+      const secondAngle = s * 6;
+      const minuteAngle = m * 6;
+      const hourAngle   = (h12 * 30) + (m * 0.5);
+
+      document.getElementById('hourHand').style.transform   = `rotate(${hourAngle}deg)`;
+      document.getElementById('minuteHand').style.transform = `rotate(${minuteAngle}deg)`;
+      document.getElementById('secondHand').style.transform = `rotate(${secondAngle}deg)`;
+
+      updateSyncStatus();
+    }
+
+    function updateDate() {
+      document.getElementById('dateText').textContent = formatDateForTZ(selectedTimezone);
+      document.getElementById('timeGreeting').textContent = getTimeBasedGreeting();
+      updateServiceHours();
+    }
+    function setRandomQuote() {
+      const q = spaQuotes[Math.floor(Math.random()*spaQuotes.length)];
+      document.getElementById('quoteText').textContent = q.text;
+      document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
+    }
+
+    // ===== Status UI =====
+    function updateSyncStatus() {
+      const el = document.getElementById('syncStatus');
+      if (!el) return;
+      const nowStr = formatTimeForTZ(selectedTimezone);
+      if (lastSyncOK) { el.textContent = `✅ Synced • ${nowStr}`; el.style.color = '#B48A64'; }
+      else { el.textContent = `Device time • ${nowStr}`; el.style.color = '#B48A64'; }
+    }
+
+    // ===== Tickers aligned to whole second/minute =====
+    function startClockTicker() {
+      const align = 1000 - (nowAccurate().getTime() % 1000);
+      setTimeout(function tick() {
+        updateClock();
+        const ms = nowAccurate().getMilliseconds();
+        setTimeout(tick, 1000 - ms);
+      }, align);
+    }
+    function startDateTicker() {
+      const msToNextMinute = 60000 - (nowAccurate().getTime() % 60000);
+      setTimeout(() => {
+        updateDate();
+        setInterval(updateDate, 60000);
+      }, msToNextMinute);
+    }
+
+    // ===== Timezone selector =====
+    function applyInitialTimezoneSelect() {
+      const sel = document.getElementById('timezoneSelect');
+      if (selectedTimezone !== 'auto' && ![...sel.options].some(o => o.value === selectedTimezone)) {
+        const opt = document.createElement('option'); opt.value = selectedTimezone; opt.textContent = selectedTimezone; sel.appendChild(opt);
+      }
+      sel.value = selectedTimezone;
+      sel.addEventListener('change', () => { selectedTimezone = sel.value; lastGreetingBlock = null; updateDate(); updateClock(); });
+    }
+
+    // ===== Visibility/focus =====
+    function handleVisibilityChange() {
+      if (!document.hidden) syncAccurateTime().finally(() => { updateDate(); updateClock(); });
+    }
+
+    // ===== Init =====
+    async function init() {
+      createClockFace();
+      setRandomQuote();
+      applyInitialTimezoneSelect();
+
+      // Settings UI event listeners
+      document.getElementById('settingsBtn').addEventListener('click', openSettings);
+      document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+      document.getElementById('saveHoursBtn').addEventListener('click', saveHours);
+      
+      // Close modal when clicking outside
+      document.getElementById('settingsModal').addEventListener('click', (e) => {
+        if (e.target.id === 'settingsModal') closeSettings();
+      });
+
+      await syncAccurateTime();
+      layoutDial();
+      updateDate(); updateClock();
+
+      watchResize();
+      startClockTicker();
+      startDateTicker();
+
+      setInterval(syncAccurateTime, RESYNC_MIN * 60 * 1000);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', () => { syncAccurateTime().finally(() => { updateDate(); updateClock(); }); });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
