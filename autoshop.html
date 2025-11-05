@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auto Repair Shop Time Widget - Compact</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@500;600;700&display=swap');
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Barlow','Arial',sans-serif;
+      background:linear-gradient(135deg,#2C2C2C 0%,#1A1A1A 100%);
+      padding:20px;min-height:100vh;display:flex;align-items:center;justify-content:center
+    }
+    .shop-widget{
+      background:linear-gradient(145deg,#FAF7F3,#F5E6D3);
+      border-radius:16px;padding:20px;
+      box-shadow:0 10px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.9);
+      border:2px solid #B48A64;max-width:420px;width:100%;text-align:center;position:relative;overflow:hidden
+    }
+    .shop-widget::after{
+      content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+      background-image:repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(180,138,100,0.02) 10px,
+        rgba(180,138,100,0.02) 20px
+      );
+      pointer-events:none;z-index:1
+    }
+    .widget-content{position:relative;z-index:2}
+
+    .shop-header{margin-bottom:12px;text-align:center}
+    .shop-title{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:22px;color:#B48A64;font-weight:700;margin-bottom:6px;
+      line-height:1.1;letter-spacing:2px;text-transform:uppercase;text-align:center;
+      text-shadow:1px 1px 3px rgba(180,138,100,.3)
+    }
+    .date-text{font-size:12px;color:#B48A64;font-weight:600;text-align:center;margin-bottom:6px}
+
+    .timezone-selector{margin-top:6px;text-align:center;display:flex;flex-direction:column;align-items:center}
+    .timezone-controls{display:flex;align-items:center;gap:8px;justify-content:center}
+    .timezone-selector select{
+      background:rgba(180,138,100,.15);border:1px solid rgba(180,138,100,.4);
+      border-radius:6px;padding:5px 10px;font-size:11px;color:#B48A64;font-family:inherit;
+      cursor:pointer;transition:.3s ease;font-weight:600
+    }
+    .timezone-selector select:hover{background:rgba(180,138,100,.25);border-color:#B48A64}
+    .timezone-selector select:focus{outline:none;border-color:#C9A87C;box-shadow:0 0 0 2px rgba(201,168,124,.2)}
+    .sync-status{font-size:9px;color:#B48A64;margin-top:3px;text-align:center;font-weight:500}
+
+    .settings-btn{
+      background:rgba(180,138,100,.2);border:1px solid rgba(180,138,100,.4);
+      border-radius:50%;width:28px;height:28px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:14px;
+      transition:transform .3s cubic-bezier(0.68,-0.55,0.265,1.55);
+      box-shadow:0 2px 6px rgba(0,0,0,.15)
+    }
+    .settings-btn:hover{
+      background:rgba(180,138,100,.35);border-color>#B48A64;
+      transform:scale(1.05) rotate(180deg);box-shadow:0 3px 10px rgba(0,0,0,.25)
+    }
+
+    .service-hours{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(180,138,100,.15);border-radius:8px;padding:6px 12px;
+      font-size:12px;margin-top:6px;border:1px solid rgba(180,138,100,.3);
+      transition:all .3s ease;font-weight:600
+    }
+    .service-hours.open{
+      background:rgba(201,168,124,.25);border-color:#C9A87C;color:#8B7355;
+      animation:pulse-open 2s ease-in-out infinite
+    }
+    @keyframes pulse-open{
+      0%,100%{box-shadow:0 0 0 0 rgba(201,168,124,0.4)}
+      50%{box-shadow:0 0 0 8px rgba(201,168,124,0)}
+    }
+    .service-hours.closing-soon{background:rgba(232,208,184,.3);border-color:#C9A87C;color:#B48A64}
+    .service-hours.closed{background:rgba(180,138,100,.1);border-color:rgba(180,138,100,.25);color:#8B7355}
+    .status-icon{font-size:14px}
+    .status-text{color:inherit;font-weight:600;font-size:11px}
+
+    /* ================= GAUGE ================= */
+
+    .gauge-container{
+      position:relative;
+      width:100%;
+      max-width:360px;
+      height:190px;
+      margin:12px auto 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .gauge-base{
+      position:absolute;
+      width:100%;
+      height:180px;
+      top:0;
+      background:linear-gradient(180deg,
+        #2C2416 0%,
+        #3A3020 20%,
+        #453825 50%,
+        #4A3D2A 80%,
+        #524330 100%
+      );
+      border-radius:180px 180px 0 0;
+      box-shadow:
+        inset 0 4px 20px rgba(0,0,0,.8),
+        inset 0 -2px 10px rgba(201,168,124,.1),
+        0 -4px 20px rgba(0,0,0,.4);
+      border:3px solid #B48A64;
+      border-bottom:2px solid #B48A64;
+      overflow:visible;
+    }
+
+    .gauge-inner{
+      position:absolute;
+      top:8px;left:8px;right:8px;bottom:0;
+      border-radius:180px 180px 0 0;
+      background:linear-gradient(180deg,rgba(250,247,243,0.05) 0%,transparent 30%);
+      border:1px solid rgba(180,138,100,.2);
+      border-bottom:none;
+    }
+
+    .gauge-container:hover .gauge-needle{
+      filter:drop-shadow(0 0 12px rgba(201,168,124,0.6));
+    }
+
+    .gauge-ticks{
+      position:absolute;
+      width:100%;
+      height:100%;
+      bottom:0;
+      left:0;
+    }
+    .tick{
+      position:absolute;
+      bottom:0;
+      left:50%;
+      width:1px;
+      height:12px;
+      background:rgba(201,168,124,0.5);
+      transform-origin:50% 100%;
+    }
+    .tick.major{
+      height:18px;
+      width:2px;
+      background:rgba(201,168,124,0.7);
+    }
+    .tick.minor{
+      height:8px;
+      background:rgba(201,168,124,0.3);
+    }
+
+    .time-labels{
+      position:absolute;
+      width:100%;
+      height:100%;
+      bottom:0;
+      left:0;
+    }
+    .time-label{
+      position:absolute;
+      bottom:0;
+      left:50%;
+      transform-origin:50% 100%;
+      pointer-events:none;
+    }
+    .label-text{
+      position:absolute;
+      bottom:135px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:10px;
+      color:#D4C4A8;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      text-shadow:0 0 8px rgba(0,0,0,.7);
+      background:rgba(44,36,22,0.7);
+      padding:2px 5px;
+      border-radius:3px;
+      white-space:nowrap;
+    }
+    .label-night-start{transform:rotate(-90deg)}
+    .label-night-start .label-text{transform:translateX(-50%) rotate(90deg)}
+    .label-morning{transform:rotate(-45deg)}
+    .label-morning .label-text{transform:translateX(-50%) rotate(45deg)}
+    .label-noon{transform:rotate(0deg)}
+    .label-noon .label-text{transform:translateX(-50%) rotate(0deg)}
+    .label-evening{transform:rotate(45deg)}
+    .label-evening .label-text{transform:translateX(-50%) rotate(-45deg)}
+    .label-night-end{transform:rotate(90deg)}
+    .label-night-end .label-text{transform:translateX(-50%) rotate(-90deg)}
+
+    .gauge-needle{
+      position:absolute;
+      bottom:0;
+      left:50%;
+      width:4px;
+      height:70%;
+      background:linear-gradient(to top,#FF6B35 0%,#FF8C42 40%,#FFA952 70%,#FFC864 100%);
+      transform-origin:50% 100%;
+      transform:translateX(-50%) rotate(0deg);
+      border-radius:2px 2px 0 0;
+      transition:transform 1s cubic-bezier(0.4,0.0,0.2,1);
+      box-shadow:0 0 15px rgba(255,140,66,.6);
+      z-index:10;
+      clip-path:polygon(35% 0%,65% 0%,55% 100%,45% 100%);
+    }
+    .gauge-center{
+      position:absolute;
+      width:20px;height:20px;
+      background:radial-gradient(circle,#FF8C42 0%,#B48A64 50%,#2C2416 100%);
+      border-radius:50%;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:15;
+      box-shadow:0 0 0 3px #3A3020,0 3px 10px rgba(0,0,0,.5);
+      border:1px solid #D4C4A8;
+    }
+
+    /* mechanic helper conversions inside the dial */
+    .gauge-metrics{
+      position:absolute;
+      bottom:32px;
+      left:50%;
+      transform:translateX(-50%);
+      width:88%;
+      display:flex;
+      justify-content:space-between;
+      font-family:'Barlow','Arial',sans-serif;
+      z-index:12;
+      pointer-events:none;
+    }
+    .metric{
+      text-align:center;
+      max-width:33%;
+    }
+    .metric-label{
+      font-size:8px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:#C9A87C;
+    }
+    .metric-value{
+      font-size:9px;
+      color:#F7E3C0;
+      white-space:nowrap;
+    }
+
+    .time-display{
+      margin-top:10px;
+      background:linear-gradient(135deg,#F5E6D3,#FAF7F3);
+      border-radius:8px;padding:10px 16px;
+      box-shadow:inset 0 2px 6px rgba(180,138,100,.15),0 2px 8px rgba(180,138,100,.2);
+      border:2px solid #C9A87C
+    }
+    .digital-time{
+      font-size:28px;font-weight:700;
+      background:linear-gradient(135deg,#B48A64,#C9A87C);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      font-family:'Barlow','Courier New',monospace;
+      letter-spacing:2px;line-height:1
+    }
+    .digital-date{
+      font-size:10px;color:#B48A64;margin-top:3px;
+      font-weight:600;letter-spacing:.5px
+    }
+
+    .quote-section{
+      background:rgba(232,208,184,.15);border-radius:10px;padding:12px;margin:10px 0 0;
+      border-left:3px solid #B48A64
+    }
+    .quote-text{
+      font-size:12px;color:#8B7355;line-height:1.5;font-style:italic;
+      margin-bottom:6px;font-weight:500
+    }
+    .quote-author{font-size:10px;color:#B48A64;font-weight:600;text-align:right;letter-spacing:.5px}
+
+    .settings-modal{
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+      z-index:1000;align-items:center;justify-content:center
+    }
+    .settings-modal.active{display:flex}
+    .settings-panel{
+      background:#FAF7F3;border-radius:16px;padding:24px;
+      max-width:500px;width:90%;max-height:80vh;overflow-y:auto;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);border:2px solid #B48A64
+    }
+    .settings-header{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:20px;border-bottom:2px solid #E8D0B8;padding-bottom:12px
+    }
+    .settings-title{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:20px;color:#B48A64;font-weight:700;text-transform:uppercase;letter-spacing:1.5px
+    }
+    .close-btn{
+      background:none;border:none;font-size:24px;cursor:pointer;
+      color:#B48A64;transition:.2s;padding:0;width:32px;height:32px;
+      display:flex;align-items:center;justify-content:center;border-radius:50%
+    }
+    .close-btn:hover{background:rgba(180,138,100,.2);transform:rotate(90deg)}
+    .day-config{margin-bottom:14px;padding:10px;background:rgba(232,208,184,.15);border-radius:8px;border:1px solid rgba(180,138,100,.2)}
+    .day-label{
+      font-size:13px;color:#B48A64;font-weight:700;margin-bottom:6px;
+      display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px
+    }
+    .day-label input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#B48A64}
+    .time-inputs{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .time-inputs label{font-size:11px;color:#8B7355;font-weight:600;text-transform:uppercase}
+    .time-inputs input[type="time"]{
+      padding:5px 8px;border:1px solid rgba(180,138,100,.4);
+      border-radius:6px;background:#FAF7F3;color:#8B7355;
+      font-family:inherit;font-size:12px;transition:.2s;font-weight:600
+    }
+    .time-inputs input[type="time"]:focus{
+      outline:none;border-color:#B48A64;box-shadow:0 0 0 2px rgba(180,138,100,.2)
+    }
+    .time-inputs input[type="time"]:disabled{opacity:.4;cursor:not-allowed}
+    .save-btn{
+      width:100%;padding:12px;background:#B48A64;color:#FAF7F3;
+      border:none;border-radius:8px;font-size:13px;font-weight:700;
+      cursor:pointer;transition:.3s;margin-top:14px;font-family:inherit;
+      text-transform:uppercase;letter-spacing:1px
+    }
+    .save-btn:hover{background:#8B7355;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+    .save-btn:active{transform:translateY(0)}
+
+    @media (max-width:480px){
+      .shop-widget{padding:16px;margin:10px}
+      .gauge-container{height:180px}
+      .gauge-base{height:160px}
+      .digital-time{font-size:24px}
+      .settings-panel{padding:18px;width:95%}
+      .metric-value{font-size:8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shop-widget">
+    <div class="widget-content">
+      <div class="shop-header">
+        <h1 class="shop-title" id="shopGreeting">🔧 AUTO REPAIR SHOP 🔧</h1>
+        <div class="date-text" id="dateText">Loading...</div>
+
+        <div class="timezone-selector">
+          <div class="timezone-controls">
+            <select id="timezoneSelect">
+              <option value="auto">Auto (Device Time)</option>
+              <option value="America/New_York">New York (ET)</option>
+              <option value="America/Los_Angeles">Los Angeles (PT)</option>
+              <option value="America/Chicago">Chicago (CT)</option>
+              <option value="America/Denver">Denver (MT)</option>
+              <option value="Europe/London">London (UK)</option>
+              <option value="Europe/Paris">Paris (FR)</option>
+              <option value="Asia/Kolkata">India (IST)</option>
+              <option value="Asia/Dubai">Dubai (GST)</option>
+              <option value="Asia/Tokyo">Tokyo (JST)</option>
+              <option value="Australia/Sydney">Sydney (AET)</option>
+            </select>
+            <button class="settings-btn" id="settingsBtn" title="Configure Service Hours">⚙️</button>
+          </div>
+          <div class="sync-status" id="syncStatus">Syncing time…</div>
+        </div>
+
+        <div class="service-hours" id="serviceHours">
+          <span class="status-icon" id="statusIcon">🔧</span>
+          <span class="status-text" id="statusText">Checking hours...</span>
+        </div>
+      </div>
+
+      <div class="gauge-container">
+        <div class="gauge-base">
+          <div class="gauge-inner"></div>
+
+          <div class="gauge-ticks" id="gaugeTicks"></div>
+
+          <div class="time-labels">
+            <div class="time-label label-night-start">
+              <span class="label-text">Night</span>
+            </div>
+            <div class="time-label label-morning">
+              <span class="label-text">Morning</span>
+            </div>
+            <div class="time-label label-noon">
+              <span class="label-text">Noon</span>
+            </div>
+            <div class="time-label label-evening">
+              <span class="label-text">Evening</span>
+            </div>
+            <div class="time-label label-night-end">
+              <span class="label-text">Night</span>
+            </div>
+          </div>
+
+          <div class="gauge-needle" id="gaugeNeedle"></div>
+          <div class="gauge-center"></div>
+
+          <!-- mechanic helper conversions -->
+          <div class="gauge-metrics">
+            <div class="metric">
+              <div class="metric-label">Torque</div>
+              <div class="metric-value">1 ft-lb = 1.36 Nm</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Tyre</div>
+              <div class="metric-value">32 psi ≈ 2.2 bar</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Oil</div>
+              <div class="metric-value">4 qt ≈ 3.8 L</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="time-display">
+        <div class="digital-time" id="digitalTime">00:00:00</div>
+        <div class="digital-date" id="digitalDate">Loading...</div>
+      </div>
+
+      <div class="quote-section">
+        <div class="quote-text" id="quoteText">Loading inspiration...</div>
+        <div class="quote-author" id="quoteAuthor">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h2 class="settings-title">🔧 Service Hours</h2>
+        <button class="close-btn" id="closeSettingsBtn">×</button>
+      </div>
+      <div id="dayConfigs"></div>
+      <button class="save-btn" id="saveHoursBtn">💾 Save Hours</button>
+    </div>
+  </div>
+
+  <script>
+    const autoQuotes=[
+      {text:"Quality repairs, every time.",author:"Shop Pro"},
+      {text:"We restore your peace of mind.",author:"Our Promise"},
+      {text:"Expert hands, honest service.",author:"Trust Us"},
+      {text:"Your safety is our top priority.",author:"Safety First"},
+      {text:"Precision work for the road ahead.",author:"Craftsman"},
+      {text:"We've got you covered.",author:"Full Service"},
+      {text:"Trust earned one repair at a time.",author:"Build Trust"},
+      {text:"Keep your ride smooth and safe.",author:"Journey On"},
+      {text:"Professional with a personal touch.",author:"Our Way"},
+      {text:"Because every mile matters.",author:"Mile by Mile"},
+      {text:"Expert diagnostics, real solutions.",author:"Problem Fix"},
+      {text:"Your car's second home.",author:"Care Daily"},
+      {text:"Certified techs, unbeatable service.",author:"Excellence"},
+      {text:"Maintain today, drive worry-free.",author:"Plan Ahead"},
+      {text:"Experience meets dedication here.",author:"Auto Magic"}
+    ];
+
+    const defaultServiceHours={
+      monday:{enabled:true,open:'08:00',close:'18:00'},
+      tuesday:{enabled:true,open:'08:00',close:'18:00'},
+      wednesday:{enabled:true,open:'08:00',close:'18:00'},
+      thursday:{enabled:true,open:'08:00',close:'18:00'},
+      friday:{enabled:true,open:'08:00',close:'18:00'},
+      saturday:{enabled:true,open:'09:00',close:'16:00'},
+      sunday:{enabled:false,open:'10:00',close:'14:00'}
+    };
+
+    function loadServiceHours(){
+      const saved=localStorage.getItem('autoShopServiceHours');
+      if(saved){try{return JSON.parse(saved)}catch{return defaultServiceHours}}
+      return defaultServiceHours;
+    }
+    function saveServiceHours(hours){
+      localStorage.setItem('autoShopServiceHours',JSON.stringify(hours));
+    }
+    let serviceHours=loadServiceHours();
+
+    const urlTZ=new URLSearchParams(location.search).get('tz');
+    let selectedTimezone=urlTZ||'auto';
+    const RESYNC_MIN=10;
+    const MAX_TRUSTED_SKEW_MS=2*60*1000;
+
+    let serverOffsetMs=0;
+    let lastSyncOK=false;
+    let lastSyncAt=null;
+
+    async function syncAccurateTime(){
+      try{
+        const t0=performance.now();
+        const res=await fetch(`./?_t=${Date.now()}`,{method:'HEAD',cache:'no-store'});
+        const t1=performance.now();
+        const dateHdr=res.headers.get('Date');
+        if(dateHdr){
+          const baseMs=new Date(dateHdr).getTime();
+          const halfRTT=Math.round((t1-t0)/2);
+          const estNow=baseMs+halfRTT;
+          serverOffsetMs=estNow-Date.now();
+          if(Math.abs(serverOffsetMs)>MAX_TRUSTED_SKEW_MS){
+            serverOffsetMs=0;lastSyncOK=false;lastSyncAt=new Date();updateSyncStatus();return;
+          }
+          lastSyncOK=true;lastSyncAt=new Date();updateSyncStatus();return;
+        }
+      }catch{}
+      try{
+        const t0=performance.now();
+        const r=await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC',{cache:'no-store'});
+        const t1=performance.now();
+        if(r.ok){
+          const j=await r.json();
+          if(j&&typeof j.unixtime==='number'){
+            const halfRTT=Math.round((t1-t0)/2);
+            const estUtcMs=j.unixtime*1000+halfRTT;
+            serverOffsetMs=estUtcMs-Date.now();
+            if(Math.abs(serverOffsetMs)>MAX_TRUSTED_SKEW_MS){
+              serverOffsetMs=0;lastSyncOK=false;lastSyncAt=new Date();updateSyncStatus();return;
+            }
+            lastSyncOK=true;lastSyncAt=new Date();updateSyncStatus();return;
+          }
+        }
+      }catch{}
+      serverOffsetMs=0;lastSyncOK=false;lastSyncAt=new Date();updateSyncStatus();
+    }
+    const nowAccurate=()=>new Date(Date.now()+serverOffsetMs);
+
+    function getPartsForTZ(tz){
+      const d=nowAccurate();
+      if(tz==='auto')return{h24:d.getHours(),m:d.getMinutes(),s:d.getSeconds(),date:d};
+      try{
+        const parts=new Intl.DateTimeFormat('en-GB',{
+          timeZone:tz,hour:'numeric',minute:'numeric',second:'numeric',hour12:false
+        }).formatToParts(d);
+        const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+        return{h24:+map.hour,m:+map.minute,s:+map.second,date:d};
+      }catch{
+        return{h24:d.getHours(),m:d.getMinutes(),s:d.getSeconds(),date:d};
+      }
+    }
+
+    function formatDateForTZ(tz){
+      const d=nowAccurate();
+      try{
+        return new Intl.DateTimeFormat('en-US',{
+          timeZone:tz==='auto'?undefined:tz,
+          weekday:'long',year:'numeric',month:'long',day:'numeric'
+        }).format(d);
+      }catch{
+        return d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      }
+    }
+    function formatTimeForTZ(tz){
+      const d=nowAccurate();
+      try{
+        return new Intl.DateTimeFormat('en-US',{
+          timeZone:tz==='auto'?undefined:tz,
+          hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true
+        }).format(d);
+      }catch{
+        return d.toLocaleTimeString('en-US');
+      }
+    }
+    function formatTime12(h,m){
+      const period=h>=12?'PM':'AM';
+      const h12=h%12||12;
+      const mStr=m.toString().padStart(2,'0');
+      return`${h12}:${mStr}${period}`;
+    }
+
+    function updateServiceHours(){
+      const {h24,m}=getPartsForTZ(selectedTimezone);
+      const d=nowAccurate();
+      const dayNames=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+
+      let dayIndex;
+      if(selectedTimezone==='auto'){dayIndex=d.getDay();}
+      else{
+        try{
+          const formatter=new Intl.DateTimeFormat('en-US',{timeZone:selectedTimezone,weekday:'long'});
+          const dayName=formatter.format(d).toLowerCase();
+          dayIndex=dayNames.indexOf(dayName);
+        }catch{dayIndex=d.getDay();}
+      }
+
+      const day=dayNames[dayIndex];
+      const hours=serviceHours[day];
+      const statusEl=document.getElementById('serviceHours');
+      const iconEl=document.getElementById('statusIcon');
+      const textEl=document.getElementById('statusText');
+
+      if(!hours||!hours.enabled){
+        statusEl.className='service-hours closed';
+        iconEl.textContent='🔒';
+        textEl.textContent='Closed Today';
+        statusEl.style.display='inline-flex';
+        return;
+      }
+
+      const currentMinutes=h24*60+m;
+      const [openH,openM]=hours.open.split(':').map(Number);
+      const [closeH,closeM]=hours.close.split(':').map(Number);
+      const openMinutes=openH*60+openM;
+      const closeMinutes=closeH*60+closeM;
+
+      statusEl.style.display='inline-flex';
+
+      if(currentMinutes>=openMinutes&&currentMinutes<closeMinutes){
+        const minutesUntilClose=closeMinutes-currentMinutes;
+        const closeTime=formatTime12(closeH,closeM);
+        if(minutesUntilClose<=30){
+          statusEl.className='service-hours closing-soon';
+          iconEl.textContent='⚠️';
+          textEl.textContent=`Closes ${closeTime} • ${minutesUntilClose}min`;
+        }else if(minutesUntilClose<=60){
+          statusEl.className='service-hours closing-soon';
+          iconEl.textContent='⏰';
+          textEl.textContent=`Closes ${closeTime} • 1 hour`;
+        }else{
+          statusEl.className='service-hours open';
+          iconEl.textContent='✅';
+          textEl.textContent='SHOP OPEN';
+        }
+      }else{
+        statusEl.className='service-hours closed';
+        iconEl.textContent='🔒';
+        if(currentMinutes<openMinutes){
+          const openTime=formatTime12(openH,openM);
+          textEl.textContent=`Opens ${openTime}`;
+        }else{
+          let nextDayIndex=(dayIndex+1)%7;
+          let daysChecked=0;
+          while(daysChecked<7){
+            const nextDay=dayNames[nextDayIndex];
+            const nextHours=serviceHours[nextDay];
+            if(nextHours&&nextHours.enabled){
+              const [nextOpenH,nextOpenM]=nextHours.open.split(':').map(Number);
+              const nextOpenTime=formatTime12(nextOpenH,nextOpenM);
+              const dayLabel=nextDayIndex===(dayIndex+1)%7?'Tomorrow':nextDay.charAt(0).toUpperCase()+nextDay.slice(1,3);
+              textEl.textContent=`Opens ${dayLabel} ${nextOpenTime}`;
+              break;
+            }
+            nextDayIndex=(nextDayIndex+1)%7;
+            daysChecked++;
+          }
+          if(daysChecked===7)textEl.textContent='CLOSED';
+        }
+      }
+    }
+
+    function buildSettingsUI(){
+      const container=document.getElementById('dayConfigs');
+      const dayNames=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+      const dayLabels=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      container.innerHTML='';
+      dayNames.forEach((day,index)=>{
+        const config=serviceHours[day];
+        const div=document.createElement('div');
+        div.className='day-config';
+        div.innerHTML=`
+          <div class="day-label">
+            <input type="checkbox" id="enable-${day}" ${config.enabled?'checked':''}>
+            <label for="enable-${day}" style="cursor:pointer;flex:1">${dayLabels[index]}</label>
+          </div>
+          <div class="time-inputs">
+            <label>Open: <input type="time" id="open-${day}" value="${config.open}" ${!config.enabled?'disabled':''}></label>
+            <label>Close: <input type="time" id="close-${day}" value="${config.close}" ${!config.enabled?'disabled':''}></label>
+          </div>
+        `;
+        container.appendChild(div);
+        const checkbox=div.querySelector(`#enable-${day}`);
+        const openInput=div.querySelector(`#open-${day}`);
+        const closeInput=div.querySelector(`#close-${day}`);
+        checkbox.addEventListener('change',()=>{
+          openInput.disabled=!checkbox.checked;
+          closeInput.disabled=!checkbox.checked;
+        });
+      });
+    }
+    function openSettings(){buildSettingsUI();document.getElementById('settingsModal').classList.add('active');}
+    function closeSettings(){document.getElementById('settingsModal').classList.remove('active');}
+    function saveHours(){
+      const dayNames=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+      const newHours={};
+      dayNames.forEach(day=>{
+        const enabled=document.getElementById(`enable-${day}`).checked;
+        const open=document.getElementById(`open-${day}`).value;
+        const close=document.getElementById(`close-${day}`).value;
+        newHours[day]={enabled,open,close};
+      });
+      serviceHours=newHours;
+      saveServiceHours(newHours);
+      updateServiceHours();
+      closeSettings();
+    }
+
+    function createGaugeTicks(){
+      const ticksContainer=document.getElementById('gaugeTicks');
+      for(let i=0;i<=24;i++){
+        const tick=document.createElement('div');
+        if(i%6===0)tick.className='tick major';
+        else if(i%3===0)tick.className='tick';
+        else tick.className='tick minor';
+        const angle=(i*7.5)-90;
+        tick.style.transform=`translateX(-50%) rotate(${angle}deg)`;
+        ticksContainer.appendChild(tick);
+      }
+    }
+
+    function updateGauge(){
+      const {h24,m}=getPartsForTZ(selectedTimezone);
+      const totalMinutes=h24*60+m;
+      const angle=((totalMinutes/(24*60))*180)-90;
+      const needle=document.getElementById('gaugeNeedle');
+      needle.style.transform=`translateX(-50%) rotate(${angle}deg)`;
+    }
+
+    function updateDigitalTime(){
+      const timeStr=formatTimeForTZ(selectedTimezone);
+      document.getElementById('digitalTime').textContent=timeStr;
+      document.getElementById('digitalDate').textContent=formatDateForTZ(selectedTimezone);
+      updateSyncStatus();
+    }
+
+    function updateGreeting(){
+      document.getElementById('dateText').textContent=formatDateForTZ(selectedTimezone);
+      updateServiceHours();
+    }
+
+    function setRandomQuote(){
+      const q=autoQuotes[Math.floor(Math.random()*autoQuotes.length)];
+      document.getElementById('quoteText').textContent=q.text;
+      document.getElementById('quoteAuthor').textContent=`— ${q.author}`;
+    }
+
+    function updateSyncStatus(){
+      const el=document.getElementById('syncStatus');
+      if(!el)return;
+      if(lastSyncOK){el.textContent='✓ Synced';el.style.color='#B48A64';}
+      else{el.textContent='Device time';el.style.color='#B48A64';}
+    }
+
+    function startGaugeTicker(){
+      const align=1000-(nowAccurate().getTime()%1000);
+      setTimeout(function tick(){
+        updateGauge();
+        updateDigitalTime();
+        const ms=nowAccurate().getMilliseconds();
+        setTimeout(tick,1000-ms);
+      },align);
+    }
+    function startGreetingTicker(){
+      const msToNextMinute=60000-(nowAccurate().getTime()%60000);
+      setTimeout(()=>{
+        updateGreeting();
+        setInterval(updateGreeting,60000);
+      },msToNextMinute);
+    }
+
+    function applyInitialTimezoneSelect(){
+      const sel=document.getElementById('timezoneSelect');
+      if(selectedTimezone!=='auto'&&![...sel.options].some(o=>o.value===selectedTimezone)){
+        const opt=document.createElement('option');
+        opt.value=selectedTimezone;
+        opt.textContent=selectedTimezone;
+        sel.appendChild(opt);
+      }
+      sel.value=selectedTimezone;
+      sel.addEventListener('change',()=>{
+        selectedTimezone=sel.value;
+        updateGreeting();
+        updateGauge();
+        updateDigitalTime();
+      });
+    }
+
+    function handleVisibilityChange(){
+      if(!document.hidden){
+        syncAccurateTime().finally(()=>{
+          updateGreeting();
+          updateGauge();
+          updateDigitalTime();
+        });
+      }
+    }
+
+    async function init(){
+      setRandomQuote();
+      applyInitialTimezoneSelect();
+      createGaugeTicks();
+
+      document.getElementById('settingsBtn').addEventListener('click',openSettings);
+      document.getElementById('closeSettingsBtn').addEventListener('click',closeSettings);
+      document.getElementById('saveHoursBtn').addEventListener('click',saveHours);
+      document.getElementById('settingsModal').addEventListener('click',e=>{
+        if(e.target.id==='settingsModal')closeSettings();
+      });
+
+      await syncAccurateTime();
+      updateGreeting();
+      updateGauge();
+      updateDigitalTime();
+
+      startGaugeTicker();
+      startGreetingTicker();
+
+      setInterval(syncAccurateTime,RESYNC_MIN*60*1000);
+      document.addEventListener('visibilitychange',handleVisibilityChange);
+      window.addEventListener('focus',()=>{
+        syncAccurateTime().finally(()=>{
+          updateGreeting();
+          updateGauge();
+          updateDigitalTime();
+        });
+      });
+
+      setInterval(setRandomQuote,30000);
+    }
+
+    document.addEventListener('DOMContentLoaded',init);
+  </script>
+</body>
+</html>
