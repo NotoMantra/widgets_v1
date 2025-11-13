@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cafe Clock Widget</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Georgia','Times New Roman',serif;
+      background:linear-gradient(135deg,#f5f1eb 0%,#ede4d3 100%);
+      padding:5px;min-height:100vh;display:flex;align-items:center;justify-content:center
+    }
+    .cafe-widget{
+      background:linear-gradient(145deg,#faf8f3,#f0ebe0);
+      border-radius:20px;padding:15px;
+      box-shadow:0 8px 32px rgba(139,116,95,.15), inset 0 1px 0 rgba(255,255,255,.8);
+      border:1px solid rgba(139,116,95,.1);max-width:400px;text-align:center;position:relative;overflow:hidden
+    }
+    .cafe-widget::before{
+      content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+      background:radial-gradient(circle,rgba(139,116,95,.03) 0%,transparent 70%);
+      animation:gentle-pulse 8s ease-in-out infinite
+    }
+    @keyframes gentle-pulse{0%,100%{transform:scale(1) rotate(0);opacity:.3}50%{transform:scale(1.1) rotate(180deg);opacity:.1}}
+    .widget-content{position:relative;z-index:2}
+    .cafe-header{margin-bottom:16px}
+    .cafe-title{font-size:20px;color:#8b745f;font-weight:400;margin-bottom:8px;line-height:1.3}
+    .date-text{font-size:14px;color:#a0906b;font-style:italic}
+    .timezone-selector{margin-top:8px}
+    .timezone-selector select{
+      background:rgba(139,116,95,.1);border:1px solid rgba(139,116,95,.3);
+      border-radius:6px;padding:4px 8px;font-size:11px;color:#8b745f;font-family:inherit;cursor:pointer;transition:.2s
+    }
+    .timezone-selector select:hover{background:rgba(139,116,95,.15);border-color:rgba(139,116,95,.5)}
+    .timezone-selector select:focus{outline:none;border-color:#8b745f;box-shadow:0 0 0 2px rgba(139,116,95,.2)}
+    .sync-status{font-size:10px;color:#a0906b;margin-top:4px;text-align:center;transition:color .3s ease}
+
+    .clock-container{
+      position:relative;width:200px;height:200px;
+      margin:14px auto 20px;
+      background:radial-gradient(circle,#f7f3ec 0%,#ede4d3 70%,#d4c4a8 100%);
+      border-radius:50%;box-shadow:inset 0 0 20px rgba(139,116,95,.1),0 4px 20px rgba(139,116,95,.2);
+      border:3px solid #c9b395
+    }
+
+    .hour-mark,.minute-mark{position:absolute;left:50%;background:#8b745f}
+    .minute-mark{background:#a0906b}
+    .clock-hand{
+      position:absolute !important;background:#8b745f !important;border-radius:2px !important;
+      transform-origin:50% 100% !important;left:50% !important;transition:none !important
+    }
+    .second-hand{background:#d4a574 !important}
+    .clock-center{
+      position:absolute;width:12px;height:12px;background:#8b745f;border-radius:50%;
+      top:50%;left:50%;margin:-6px 0 0 -6px;z-index:10;box-shadow:0 0 0 2px #f7f3ec
+    }
+
+    .coffee-beans{display:flex;justify-content:center;gap:10px;margin:15px 0}
+    .bean{width:8px;height:12px;background:linear-gradient(45deg,#8b745f,#a0906b);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;opacity:.6;animation:bean-bounce 2s ease-in-out infinite}
+    .bean:nth-child(2){animation-delay:.3s}.bean:nth-child(3){animation-delay:.6s}
+    @keyframes bean-bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.1)}}
+    .quote-section{background:rgba(212,165,116,.08);border-radius:12px;padding:20px;margin:10px 0 0;border-left:4px solid #d4a574}
+    .quote-text{font-size:14px;color:#6d5d4f;line-height:1.5;font-style:italic;margin-bottom:8px}
+    .quote-author{font-size:11px;color:#8b745f;font-weight:600;text-align:right}
+
+    @media (max-width:480px){
+      .cafe-widget{padding:15px;margin:5px}
+      .clock-container{width:160px;height:160px}
+    }
+  </style>
+</head>
+<body>
+  <div class="cafe-widget">
+    <div class="widget-content">
+      <div class="cafe-header">
+        <h1 class="cafe-title" id="timeGreeting">☕ Good Morning! Rise & Grind ☕</h1>
+        <div class="date-text" id="dateText">Loading...</div>
+
+        <div class="timezone-selector">
+          <select id="timezoneSelect">
+            <option value="auto">Auto (Device Time)</option>
+            <option value="America/New_York">New York (ET)</option>
+            <option value="America/Los_Angeles">Los Angeles (PT)</option>
+            <option value="Europe/London">London (UK)</option>
+            <option value="Europe/Paris">Paris (FR)</option>
+            <option value="Asia/Kolkata">India (IST)</option>
+            <option value="Asia/Dubai">Dubai (GST)</option>
+            <option value="Asia/Tokyo">Tokyo (JST)</option>
+            <option value="Australia/Sydney">Sydney (AET)</option>
+          </select>
+          <div class="sync-status" id="syncStatus">🌐 Syncing with network time…</div>
+        </div>
+      </div>
+
+      <div class="clock-container" id="clockContainer">
+        <div class="clock-hand hour-hand" id="hourHand"></div>
+        <div class="clock-hand minute-hand" id="minuteHand"></div>
+        <div class="clock-hand second-hand" id="secondHand"></div>
+        <div class="clock-center"></div>
+      </div>
+
+      <div class="coffee-beans"><div class="bean"></div><div class="bean"></div><div class="bean"></div></div>
+
+      <div class="quote-section">
+        <div class="quote-text" id="quoteText">Loading inspiration...</div>
+        <div class="quote-author" id="quoteAuthor">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Quotes =====
+    const cafeQuotes = [
+      { text: "Life is too short for bad coffee and missed opportunities. ☕✨", author: "Anonymous" },
+      { text: "Coffee is a hug in a mug, and dreams are fuel for the soul. 🤗☕", author: "Unknown" },
+      { text: "Good food, good mood, good life. 🍽️😊", author: "Kitchen Wisdom" },
+      { text: "Tea time is me time - steep, sip, and reflect. 🍵🧘", author: "Tea Philosophy" },
+      { text: "Fresh cookies make everything better. 🍪❤️", author: "Baker's Truth" },
+      { text: "Sandwiches: the perfect handheld happiness. 🥪😄", author: "Lunch Logic" },
+      { text: "Life happens, tea helps, cookies comfort. 🍵🍪", author: "Daily Motto" },
+      { text: "Behind every successful day is a good breakfast. 🥐🌅", author: "Morning Wisdom" },
+      { text: "Soup for the soul, bread for the heart. 🍲🍞", author: "Comfort Food Philosophy" },
+      { text: "Sweet treats create sweet memories. 🧁💕", author: "Dessert Wisdom" },
+      { text: "Fresh ingredients, fresh perspectives. 🥗🌿", author: "Kitchen Philosophy" },
+      { text: "A slice of pie makes everything nice. 🥧✨", author: "Pie Wisdom" },
+      { text: "Hot chocolate: liquid sunshine for cloudy days. 🍫☀️", author: "Cozy Corner" },
+      { text: "Good food shared is love multiplied. 🍽️❤️", author: "Community Kitchen" },
+      { text: "Pancakes: fluffy clouds of breakfast joy. 🥞☁️", author: "Morning Magic" }
+    ];
+
+    // ===== Config =====
+    const urlTZ = new URLSearchParams(location.search).get('tz');
+    let selectedTimezone = urlTZ || 'auto';
+    const RESYNC_MIN = 10;
+    const MAX_TRUSTED_SKEW_MS = 2 * 60 * 1000;
+
+    // ===== Accurate time via network (CDN-safe) =====
+    let serverOffsetMs = 0;
+    let lastSyncOK = false;
+    let lastSyncAt = null;
+
+    async function syncAccurateTime() {
+      try {
+        const t0 = performance.now();
+        const res = await fetch(`./?_t=${Date.now()}`, { method: 'HEAD', cache: 'no-store' });
+        const t1 = performance.now();
+        const dateHdr = res.headers.get('Date');
+        if (dateHdr) {
+          const baseMs  = new Date(dateHdr).getTime();
+          const halfRTT = Math.round((t1 - t0) / 2);
+          const estNow  = baseMs + halfRTT;
+          serverOffsetMs = estNow - Date.now();
+
+          if (Math.abs(serverOffsetMs) > MAX_TRUSTED_SKEW_MS) {
+            serverOffsetMs = 0;
+            lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+            return;
+          }
+
+          lastSyncOK = true; lastSyncAt = new Date(); updateSyncStatus();
+          return;
+        }
+      } catch {}
+
+      try {
+        const t0 = performance.now();
+        const r = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { cache: 'no-store' });
+        const t1 = performance.now();
+        if (r.ok) {
+          const j = await r.json();
+          if (j && typeof j.unixtime === 'number') {
+            const halfRTT = Math.round((t1 - t0) / 2);
+            const estUtcMs = j.unixtime * 1000 + halfRTT;
+            serverOffsetMs = estUtcMs - Date.now();
+
+            if (Math.abs(serverOffsetMs) > MAX_TRUSTED_SKEW_MS) {
+              serverOffsetMs = 0;
+              lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+              return;
+            }
+
+            lastSyncOK = true; lastSyncAt = new Date(); updateSyncStatus();
+            return;
+          }
+        }
+      } catch {}
+
+      serverOffsetMs = 0; lastSyncOK = false; lastSyncAt = new Date(); updateSyncStatus();
+    }
+    const nowAccurate = () => new Date(Date.now() + serverOffsetMs);
+
+    // ===== TZ helpers =====
+    function getPartsForTZ(tz) {
+      const d = nowAccurate();
+      if (tz === 'auto') return { h24:d.getHours(), m:d.getMinutes(), s:d.getSeconds(), date:d };
+      try {
+        const parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: tz, hour:'numeric', minute:'numeric', second:'numeric', hour12:false
+        }).formatToParts(d);
+        const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        return { h24:+map.hour, m:+map.minute, s:+map.second, date:d };
+      } catch { return { h24:d.getHours(), m:d.getMinutes(), s:d.getSeconds(), date:d }; }
+    }
+    function formatDateForTZ(tz) {
+      const d = nowAccurate();
+      try {
+        return new Intl.DateTimeFormat('en-US', {
+          timeZone: tz === 'auto' ? undefined : tz,
+          weekday:'long', year:'numeric', month:'long', day:'numeric'
+        }).format(d);
+      } catch {
+        return d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      }
+    }
+    function formatTimeForTZ(tz) {
+      const d = nowAccurate();
+      try {
+        return new Intl.DateTimeFormat('en-US', {
+          timeZone: tz === 'auto' ? undefined : tz,
+          hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true
+        }).format(d);
+      } catch { return d.toLocaleTimeString('en-US'); }
+    }
+
+    // ===== Greeting (sticky per time block) =====
+    let lastGreetingBlock = null;
+    let lastGreetingText = "☕ Good Morning! Rise & Grind ☕";
+
+    function getTimeBlock(h24){
+      if (h24 >= 5 && h24 < 11) return 'morning';
+      if (h24 >= 11 && h24 < 14) return 'lunch';
+      if (h24 >= 14 && h24 < 17) return 'afternoon';
+      if (h24 >= 17 && h24 < 21) return 'evening';
+      return 'night';
+    }
+
+    function getTimeBasedGreeting() {
+      const { h24 } = getPartsForTZ(selectedTimezone);
+      const block = getTimeBlock(h24);
+
+      if (block === lastGreetingBlock) {
+        return lastGreetingText;
+      }
+
+      let a;
+      if (block === 'morning') {
+        a = ["☕ Good Morning! Rise & Grind ☕","🌅 Fresh Coffee & Pastries! 🥐","🧇 Breakfast Bliss Awaits! 🧇","🥐 Croissants & Coffee Time! ☕","🥯 Bagels & Fresh Brew! 🥯","🍳 Morning Treats Ready! 🍳","🥞 Pancakes & Hot Coffee! ☕"];
+      } else if (block === 'lunch') {
+        a = ["🍽️ Hungry? It's Lunch Time! 🍽️","🥪 Fresh Sandwiches & Soup! 🍲","🌯 Wraps & Smoothies Ready! 🥤","🍕 Pizza & Iced Tea! 🧊","🥗 Fresh Salads & Paninis! 🥖","🍜 Warm Soup & Bread! 🍞","🌮 Tasty Lunch Combos! 🌮"];
+      } else if (block === 'afternoon') {
+        a = ["🍰 Afternoon Treats & Tea! 🍵","🧁 Cupcakes & Cappuccino! ☕","🍪 Fresh Cookies & Coffee! 🍪","🍩 Donuts & Hot Chocolate! 🍫","🥧 Pie Slice & Latte! ☕","🍓 Berry Tarts & Tea! 🫖","🍦 Ice Cream & Cold Brew! 🧊"];
+      } else if (block === 'evening') {
+        a = ["🌆 Evening Bites & Wine! 🍷","🍵 Herbal Tea & Scones! 🫖","🥧 Dinner Specials Ready! 🍽️","🍝 Pasta & Garlic Bread! 🧄","🥘 Hearty Stews & Rolls! 🥖","🧀 Cheese Boards & Tea! 🍵","🍷 Wine & Light Bites! 🫒"];
+      } else {
+        a = ["🌙 Late Night Comfort Food! 🌙","☕ Decaf & Sweet Treats! 🍪","🍪 Midnight Cookies & Milk! 🥛","🌟 Cozy Night Snacks! 🥨","🍫 Hot Chocolate & Marshmallows! 🤍","🫖 Chamomile Tea & Biscuits! 🍪","🍰 Night Owl Desserts! 🦉"];
+      }
+
+      lastGreetingBlock = block;
+      lastGreetingText = a[Math.floor(Math.random() * a.length)];
+      return lastGreetingText;
+    }
+
+    // ===== Clock face =====
+    function createClockFace() {
+      const container = document.getElementById('clockContainer');
+      for (let i=0;i<12;i++){
+        const mark=document.createElement('div');
+        mark.className='hour-mark';
+        mark.style.transform=`rotate(${i*30}deg)`;
+        container.appendChild(mark);
+      }
+      for (let i=0;i<60;i++){
+        if (i%5!==0){
+          const mark=document.createElement('div');
+          mark.className='minute-mark';
+          mark.style.transform=`rotate(${i*6}deg)`;
+          container.appendChild(mark);
+        }
+      }
+    }
+
+    // ===== Responsive geometry =====
+    function layoutDial() {
+      const box = document.getElementById('clockContainer');
+      const size = Math.min(box.clientWidth, box.clientHeight);
+      const R = size/2;
+
+      const lenHour = Math.round(size * 0.30);
+      const lenMin  = Math.round(size * 0.40);
+      const lenSec  = Math.round(size * 0.425);
+
+      const wHour = Math.max(2, Math.round(size * 0.03));
+      const wMin  = Math.max(2, Math.round(size * 0.02));
+      const wSec  = Math.max(1, Math.round(size * 0.01));
+
+      const hourHand = document.getElementById('hourHand');
+      const minuteHand = document.getElementById('minuteHand');
+      const secondHand = document.getElementById('secondHand');
+
+      hourHand.style.height = `${lenHour}px`;
+      hourHand.style.top = `${R - lenHour}px`;
+      hourHand.style.width = `${wHour}px`;
+      hourHand.style.marginLeft = `${-wHour/2}px`;
+      hourHand.style.zIndex = 3;
+
+      minuteHand.style.height = `${lenMin}px`;
+      minuteHand.style.top = `${R - lenMin}px`;
+      minuteHand.style.width = `${wMin}px`;
+      minuteHand.style.marginLeft = `${-wMin/2}px`;
+      minuteHand.style.zIndex = 4;
+
+      secondHand.style.height = `${lenSec}px`;
+      secondHand.style.top = `${R - lenSec}px`;
+      secondHand.style.width = `${wSec}px`;
+      secondHand.style.marginLeft = `${-wSec/2}px`;
+      secondHand.style.zIndex = 5;
+
+      const hourMarks = box.querySelectorAll('.hour-mark');
+      const minuteMarks = box.querySelectorAll('.minute-mark');
+
+      const hourMarkH = Math.max(6, Math.round(size * 0.075));
+      const minMarkH  = Math.max(3, Math.round(size * 0.04));
+      const hourTop   = Math.round(size * 0.05);
+      const minTop    = Math.round(size * 0.07);
+      const hourOrigin= (R * 0.90);
+      const minOrigin = (R * 0.86);
+
+      hourMarks.forEach(m=>{
+        m.style.width = '2px';
+        m.style.height = `${hourMarkH}px`;
+        m.style.top = `${hourTop}px`;
+        m.style.marginLeft = '-1px';
+        m.style.transformOrigin = `50% ${hourOrigin}px`;
+      });
+      minuteMarks.forEach(m=>{
+        m.style.width = '1px';
+        m.style.height = `${minMarkH}px`;
+        m.style.top = `${minTop}px`;
+        m.style.marginLeft = '-0.5px';
+        m.style.transformOrigin = `50% ${minOrigin}px`;
+      });
+    }
+
+    let ro;
+    function watchResize() {
+      const box = document.getElementById('clockContainer');
+      if (ro) ro.disconnect();
+      ro = new ResizeObserver(() => { layoutDial(); updateClock(); });
+      ro.observe(box);
+    }
+
+    // ===== Rendering =====
+    function updateClock() {
+      const { h24, m, s } = getPartsForTZ(selectedTimezone);
+      const h12 = h24 % 12;
+
+      const secondAngle = s * 6;
+      const minuteAngle = m * 6;
+      const hourAngle   = (h12 * 30) + (m * 0.5);
+
+      document.getElementById('hourHand').style.transform   = `rotate(${hourAngle}deg)`;
+      document.getElementById('minuteHand').style.transform = `rotate(${minuteAngle}deg)`;
+      document.getElementById('secondHand').style.transform = `rotate(${secondAngle}deg)`;
+
+      updateSyncStatus();
+    }
+
+    function updateDate() {
+      document.getElementById('dateText').textContent = formatDateForTZ(selectedTimezone);
+      document.getElementById('timeGreeting').textContent = getTimeBasedGreeting();
+    }
+    function setRandomQuote() {
+      const q = cafeQuotes[Math.floor(Math.random()*cafeQuotes.length)];
+      document.getElementById('quoteText').textContent = q.text;
+      document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
+    }
+
+    // ===== Status UI =====
+    function updateSyncStatus() {
+      const el = document.getElementById('syncStatus');
+      if (!el) return;
+      const nowStr = formatTimeForTZ(selectedTimezone);
+      if (lastSyncOK) { el.textContent = `✅ Network time synced • ${nowStr}`; el.style.color = '#8b745f'; }
+      else { el.textContent = `Using device time • ${nowStr}`; el.style.color = '#8b745f'; }
+    }
+
+    // ===== Tickers =====
+    function startClockTicker() {
+      const align = 1000 - (nowAccurate().getTime() % 1000);
+      setTimeout(function tick() {
+        updateClock();
+        const ms = nowAccurate().getMilliseconds();
+        setTimeout(tick, 1000 - ms);
+      }, align);
+    }
+    function startDateTicker() {
+      const msToNextMinute = 60000 - (nowAccurate().getTime() % 60000);
+      setTimeout(() => {
+        updateDate();
+        setInterval(updateDate, 60000);
+      }, msToNextMinute);
+    }
+
+    // ===== Timezone selector =====
+    function applyInitialTimezoneSelect() {
+      const sel = document.getElementById('timezoneSelect');
+      if (selectedTimezone !== 'auto' && ![...sel.options].some(o => o.value === selectedTimezone)) {
+        const opt = document.createElement('option'); opt.value = selectedTimezone; opt.textContent = selectedTimezone; sel.appendChild(opt);
+      }
+      sel.value = selectedTimezone;
+      sel.addEventListener('change', () => { selectedTimezone = sel.value; lastGreetingBlock = null; updateDate(); updateClock(); });
+    }
+
+    // ===== Visibility/focus =====
+    function handleVisibilityChange() {
+      if (!document.hidden) syncAccurateTime().finally(() => { updateDate(); updateClock(); });
+    }
+
+    // ===== Init =====
+    async function init() {
+      createClockFace();
+      setRandomQuote();
+      applyInitialTimezoneSelect();
+
+      await syncAccurateTime();
+      layoutDial();
+      updateDate(); updateClock();
+
+      watchResize();
+      startClockTicker();
+      startDateTicker();
+
+      setInterval(syncAccurateTime, RESYNC_MIN * 60 * 1000);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', () => { syncAccurateTime().finally(() => { updateDate(); updateClock(); }); });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
