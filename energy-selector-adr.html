@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy + Dopamine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap');
+
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root {
+    --purple:#6940A5;
+    --p06:rgba(105,64,165,.06);--p10:rgba(105,64,165,.10);--p15:rgba(105,64,165,.15);
+    --p25:rgba(105,64,165,.25);--p40:rgba(105,64,165,.40);
+    --survival:#34D399;--standard:#6940A5;--hyperfocus:#F87171;
+    --appetizer:#FBBF24;--main-c:#34D399;--side-c:#818CF8;--dessert:#F472B6;
+    --t1:#1E1530;--t2:#4A3D5C;--t3:#8D80A1;--t4:#B8AECA;
+  }
+
+  html,body{width:100%;height:100%;background:transparent;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+  body{display:flex;align-items:center;justify-content:center}
+
+  /* ═══ WIDGET ═══ */
+  .w {
+    width:min(100vw,100vh);height:min(100vw,100vh);
+    max-width:480px;max-height:480px;
+    border:3.5px solid var(--p40);border-radius:28px;
+    display:flex;flex-direction:column;
+    padding:24px 26px 20px;
+    position:relative;overflow:hidden;
+    animation:breathe .7s cubic-bezier(.22,1,.36,1);
+  }
+  .w::before{content:'';position:absolute;inset:0;border-radius:25px;background:radial-gradient(ellipse at 50% -10%,var(--p10) 0%,transparent 65%);pointer-events:none}
+  @keyframes breathe{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+  /* ═══ HEADER ═══ */
+  .hd{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;z-index:1;flex-shrink:0}
+  .hd-l{display:flex;align-items:center;gap:9px}
+  .hd-l svg{width:18px;height:18px;color:var(--purple);opacity:.55}
+  .hd-l span{font-size:10.5px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3)}
+  #ts{font-size:9.5px;font-weight:400;color:var(--t4);opacity:0;transition:opacity .4s}
+  #ts.on{opacity:1}
+
+  /* ═══ ENERGY BUTTONS ═══ */
+  .sel{display:flex;gap:10px;flex:1;min-height:0;z-index:1}
+  .o{
+    flex:1;background:transparent;border:1.5px solid var(--p15);border-radius:14px;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    outline:none;position:relative;overflow:hidden;
+    transition:background .4s,border-color .4s,box-shadow .4s,transform .15s;
+  }
+  .o::after{content:'';position:absolute;inset:0;border-radius:13px;opacity:0;transition:opacity .4s;pointer-events:none}
+  .o[data-m="survival"]::after{background:radial-gradient(circle at 50% 30%,rgba(52,211,153,.07),transparent 70%)}
+  .o[data-m="standard"]::after{background:radial-gradient(circle at 50% 30%,rgba(105,64,165,.07),transparent 70%)}
+  .o[data-m="hyperfocus"]::after{background:radial-gradient(circle at 50% 30%,rgba(248,113,113,.07),transparent 70%)}
+  .o:hover{border-color:var(--p25);background:var(--p06)}
+  .o:hover::after{opacity:1}
+  .o:active{transform:scale(.97)}
+  .o.on{border-color:var(--purple);background:var(--p10);box-shadow:0 4px 20px rgba(105,64,165,.10)}
+  .o.on::after{opacity:1}
+
+  .dt{width:8px;height:8px;border-radius:50%;opacity:.3;transition:all .4s cubic-bezier(.23,1,.32,1)}
+  .o.on .dt{opacity:1;transform:scale(1.25)}
+  .o[data-m="survival"] .dt{background:var(--survival)}
+  .o[data-m="standard"] .dt{background:var(--standard)}
+  .o[data-m="hyperfocus"] .dt{background:var(--hyperfocus)}
+  .o.on[data-m="survival"] .dt{box-shadow:0 0 12px rgba(52,211,153,.55)}
+  .o.on[data-m="standard"] .dt{box-shadow:0 0 12px rgba(105,64,165,.45)}
+  .o.on[data-m="hyperfocus"] .dt{box-shadow:0 0 12px rgba(248,113,113,.45)}
+
+  .lb{font-size:12px;font-weight:400;color:var(--t3);letter-spacing:.3px;transition:all .35s;z-index:1}
+  .o.on .lb{color:var(--t1);font-weight:600}
+
+  /* ═══ ENERGY QUOTE ═══ */
+  .qbox{
+    text-align:center;padding:14px 6px 10px;z-index:1;flex-shrink:0;
+    min-height:42px;display:flex;align-items:center;justify-content:center;
+  }
+  .q{
+    font-family:'Instrument Serif',serif;font-style:italic;
+    font-size:15.5px;font-weight:400;color:var(--t2);line-height:1.5;letter-spacing:.15px;
+    opacity:0;transform:translateY(6px);transition:all .5s cubic-bezier(.23,1,.32,1);
+  }
+  .q.on{opacity:1;transform:translateY(0)}
+
+  /* ═══ DIVIDER ═══ */
+  .sep{height:1px;background:var(--p10);flex-shrink:0;z-index:1}
+
+  /* ═══ DOPAMINE SECTION ═══ */
+  .dopa{padding:12px 0 0;z-index:1;flex-shrink:0}
+  .dopa-hd{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
+  .dopa-hd span:first-child{font-size:9.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--t4)}
+
+  .track-row{position:relative;height:28px;display:flex;align-items:center;padding:0 8px}
+  .track{width:100%;height:3px;background:var(--p10);border-radius:2px;position:relative}
+  .track-fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;transition:width .35s cubic-bezier(.23,1,.32,1),background .35s}
+  .stops{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between}
+
+  .stp{
+    width:14px;height:14px;border-radius:50%;cursor:pointer;position:relative;z-index:2;
+    border:2px solid transparent;transition:all .35s cubic-bezier(.23,1,.32,1);opacity:.35;
+  }
+  .stp:hover{opacity:.65;transform:scale(1.15)}
+  .stp.on{opacity:1;transform:scale(1.3);border-color:white}
+  .stp[data-s="0"]{background:var(--appetizer)}
+  .stp[data-s="1"]{background:var(--main-c)}
+  .stp[data-s="2"]{background:var(--side-c)}
+  .stp[data-s="3"]{background:var(--dessert)}
+  .stp.on[data-s="0"]{box-shadow:0 0 10px rgba(251,191,36,.5)}
+  .stp.on[data-s="1"]{box-shadow:0 0 10px rgba(52,211,153,.5)}
+  .stp.on[data-s="2"]{box-shadow:0 0 10px rgba(129,140,248,.5)}
+  .stp.on[data-s="3"]{box-shadow:0 0 10px rgba(244,114,182,.5)}
+
+  .stp-l{
+    position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);
+    font-size:7.5px;font-weight:400;color:var(--t4);white-space:nowrap;letter-spacing:.2px;
+    transition:color .3s;
+  }
+  .stp.on .stp-l{color:var(--t2);font-weight:500}
+
+  /* dopamine pick pill */
+  .dpick{
+    margin-top:20px;
+    text-align:center;min-height:20px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:0;transform:translateY(4px);
+    transition:all .45s cubic-bezier(.23,1,.32,1);
+  }
+  .dpick.on{opacity:1;transform:translateY(0)}
+
+  .dpick-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;transition:background .3s}
+  .dpick-text{font-size:12.5px;font-weight:400;color:var(--t2);letter-spacing:.1px}
+  .dpick-time{font-size:9.5px;font-weight:400;color:var(--t4);margin-left:2px;letter-spacing:.3px}
+
+  /* re-roll hint */
+  .dpick-tap{
+    font-size:8px;color:var(--t4);letter-spacing:.5px;cursor:pointer;
+    opacity:.5;transition:opacity .3s;margin-left:4px;
+  }
+  .dpick-tap:hover{opacity:1}
+
+  /* ═══ FOOTER ═══ */
+  .ft{padding-top:10px;text-align:center;z-index:1;flex-shrink:0}
+  .ft span{font-size:9px;font-weight:400;color:var(--t4);letter-spacing:.8px}
+
+  @media(max-width:420px){
+    .w{padding:18px 20px 16px;border-radius:22px}
+    .sel{gap:8px}
+    .o{border-radius:12px;gap:8px}
+    .lb{font-size:11px}
+    .q{font-size:14px}
+    .qbox{padding:10px 4px 8px}
+  }
+</style>
+</head>
+<body>
+
+<div class="w">
+  <!-- Header -->
+  <div class="hd">
+    <div class="hd-l">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span>Energy</span>
+    </div>
+    <span id="ts"></span>
+  </div>
+
+  <!-- Energy Buttons -->
+  <div class="sel">
+    <button class="o" data-m="survival" onclick="pick('survival')"><span class="dt"></span><span class="lb">Survival</span></button>
+    <button class="o" data-m="standard" onclick="pick('standard')"><span class="dt"></span><span class="lb">Standard</span></button>
+    <button class="o" data-m="hyperfocus" onclick="pick('hyperfocus')"><span class="dt"></span><span class="lb">Hyperfocus</span></button>
+  </div>
+
+  <!-- Energy Quote (always visible) -->
+  <div class="qbox"><span class="q" id="q"></span></div>
+
+  <!-- Divider -->
+  <div class="sep"></div>
+
+  <!-- Dopamine Section -->
+  <div class="dopa">
+    <div class="dopa-hd">
+      <span>Dopamine</span>
+    </div>
+    <div class="track-row">
+      <div class="track">
+        <div class="track-fill" id="tfill"></div>
+        <div class="stops">
+          <div class="stp" data-s="0" onclick="dopaPick(0)"><span class="stp-l">5 min</span></div>
+          <div class="stp" data-s="1" onclick="dopaPick(1)"><span class="stp-l">15 min</span></div>
+          <div class="stp" data-s="2" onclick="dopaPick(2)"><span class="stp-l">ambient</span></div>
+          <div class="stp" data-s="3" onclick="dopaPick(3)"><span class="stp-l">treat</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="dpick" id="dpick">
+      <span class="dpick-dot" id="ddot"></span>
+      <span class="dpick-text" id="dtxt"></span>
+      <span class="dpick-time" id="dtime"></span>
+      <span class="dpick-tap" id="dtap" onclick="reroll()">↻</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="ft"><span>resets gently at midnight</span></div>
+</div>
+
+<script>
+/* ═══ QUOTES ═══ */
+const EQ={
+  survival:[
+    "One small thing is still a victory.",
+    "Rest is not giving up — it's gathering strength.",
+    "You showed up. That already matters.",
+    "Protect your peace today. Tomorrow will wait.",
+    "Breathing counts. Existing counts. You count.",
+    "Even the slowest river reaches the sea.",
+    "Surviving is enough on days like these.",
+    "Be soft with yourself — the world is loud enough.",
+    "Not every day needs to be a masterpiece.",
+    "The bravest thing today might be resting.",
+    "Some days the win is simply being here.",
+    "Low tide always turns — trust the rhythm.",
+    "Grace is doing less and letting that be enough.",
+    "A candle doesn't rush to burn. Neither should you.",
+    "One gentle step forward. That's all.",
+    "Today's quiet work will echo louder than you think.",
+    "Tend to yourself the way you'd tend to a friend.",
+    "Small flames still give light.",
+    "Let today be a whisper, not a shout.",
+    "Stillness is its own kind of progress."
+  ],
+  standard:[
+    "Steady hands build lasting things.",
+    "Three things done well beat ten done halfway.",
+    "You have more than enough for today.",
+    "Keep the pace — the rhythm is yours.",
+    "Focused calm is a quiet superpower.",
+    "Good days are made of small, clear choices.",
+    "The middle path carries its own beauty.",
+    "Consistency is the gentlest form of ambition.",
+    "Move with intention — not urgency.",
+    "Today has room for both effort and ease.",
+    "Solid ground beneath you. Build from here.",
+    "Clarity over chaos. Always.",
+    "Trust the pace you've chosen.",
+    "Every finished task is a promise kept to yourself.",
+    "You don't need to sprint. Just don't stop.",
+    "Balance is not standing still — it's moving gracefully.",
+    "The quiet hours hold the most honest work.",
+    "Do the next right thing, then the next.",
+    "There's elegance in simply following through.",
+    "Momentum is built one deliberate hour at a time."
+  ],
+  hyperfocus:[
+    "The world outside can wait. Go deep.",
+    "This is your sharpest hour — use every second.",
+    "Silence the noise. Become the work.",
+    "Channel everything into this single flame.",
+    "Depth over breadth. Always.",
+    "You were built for stretches like this.",
+    "Let focus be your only compass now.",
+    "The zone is calling. Don't keep it waiting.",
+    "Lock the door. This time is sacred.",
+    "Great things are finished in unbroken hours.",
+    "Distraction is the thief — guard your attention.",
+    "Flow state is not found. It's chosen.",
+    "Dive so deep the surface disappears.",
+    "One thing. All of you. Right now.",
+    "This is where ordinary becomes extraordinary.",
+    "The clock disappears when the work is real.",
+    "Sharpen your edge. Cut through everything.",
+    "Intensity with intention — that's the sweet spot.",
+    "Let the rest of the world blur.",
+    "Your focus is the rarest thing in the room."
+  ]
+};
+
+/* ═══ DOPAMINE ITEMS ═══ */
+const DP={
+  0:{name:"Appetizer",time:"5 min",items:[
+    "Walk around the block","Stretch at your desk","Play one song loud",
+    "Doodle something weird","Make a paper airplane","Do 10 jumping jacks",
+    "Water a plant","Stand in sunlight for a bit","Rearrange one shelf",
+    "Text someone you miss","Smell something nice","Look out the window — really look",
+    "Hum your favorite tune","Write one sentence about nothing","Close your eyes and count to 30",
+    "Do a quick desk cleanup"
+  ]},
+  1:{name:"Main Course",time:"15–30 min",items:[
+    "Go for a proper walk","Play guitar or any instrument","Listen to a full podcast episode",
+    "Sketch or paint something","Cook a small snack from scratch","Read a chapter of a book",
+    "Do a 20-minute workout","Write in a journal","Organize one drawer completely",
+    "Watch one episode of something good","Take a long shower","Build something with your hands",
+    "Call a friend you haven't spoken to","Solve a puzzle","Dance to a full playlist",
+    "Explore a new neighborhood on maps"
+  ]},
+  2:{name:"Side Dish",time:"ambient",items:[
+    "Put on a lo-fi playlist","Open a window for fresh air","Light a candle or incense",
+    "Change rooms","Put on rain sounds","Brew tea slowly",
+    "Tidy desk in the background","Diffuse essential oils","Switch to warm lighting",
+    "Put phone in another room","Wear your comfiest clothes","Play nature sounds",
+    "Rearrange your workspace","Hit shuffle — let music find you",
+    "Turn off one notification source","Create a clean surface somewhere"
+  ]},
+  3:{name:"Dessert",time:"treat",items:[
+    "10 minutes of guilt-free scrolling","Watch one saved YouTube video",
+    "Grab your favorite coffee or drink","Text a friend something funny",
+    "Online window-shop for 10 min","Play one round of a mobile game",
+    "Eat something you love slowly","Browse a bookstore online",
+    "Watch a satisfying video compilation","Look at old photos on your phone",
+    "Order yourself something small","Read memes for exactly 5 min",
+    "Rewatch a favorite scene","Listen to a guilty pleasure song on repeat",
+    "Plan a future trip for 10 min","Buy a small treat on the way home"
+  ]}
+};
+
+const DCOL=['#FBBF24','#34D399','#818CF8','#F472B6'];
+const K={m:'adhd-e-mode',t:'adhd-e-ts',d:'adhd-e-date',ds:'adhd-d-stop'};
+const td=()=>new Date().toISOString().slice(0,10);
+let curDopa=-1;
+
+function dayIdx(mode){
+  let h=0;const s=td()+mode;
+  for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}
+  return Math.abs(h)%EQ[mode].length;
+}
+
+/* ═══ ENERGY ═══ */
+function pick(mode){
+  document.querySelectorAll('.o').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`.o[data-m="${mode}"]`).classList.add('on');
+
+  const el=document.getElementById('q');
+  el.classList.remove('on');
+  setTimeout(()=>{el.textContent=EQ[mode][dayIdx(mode)];el.classList.add('on')},100);
+
+  try{
+    localStorage.setItem(K.m,mode);
+    localStorage.setItem(K.t,Date.now());
+    localStorage.setItem(K.d,td());
+  }catch(e){}
+  stamp();
+}
+
+/* ═══ DOPAMINE ═══ */
+function dopaPick(idx){
+  curDopa=idx;
+  document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));
+  document.querySelector(`.stp[data-s="${idx}"]`).classList.add('on');
+
+  const fill=document.getElementById('tfill');
+  fill.style.width=(idx/3*100)+'%';
+  fill.style.background=`linear-gradient(90deg,${DCOL[0]},${DCOL[idx]})`;
+
+  rollItem(idx);
+  try{localStorage.setItem(K.ds,idx)}catch(e){}
+}
+
+function rollItem(idx){
+  const items=DP[idx].items;
+  const item=items[Math.floor(Math.random()*items.length)];
+
+  const pk=document.getElementById('dpick');
+  pk.classList.remove('on');
+  setTimeout(()=>{
+    document.getElementById('ddot').style.background=DCOL[idx];
+    document.getElementById('dtxt').textContent=item;
+    document.getElementById('dtime').textContent=DP[idx].time;
+    pk.classList.add('on');
+  },80);
+}
+
+function reroll(){
+  if(curDopa>=0) rollItem(curDopa);
+}
+
+/* ═══ TIMESTAMP ═══ */
+function stamp(){
+  let raw;try{raw=localStorage.getItem(K.t)}catch(e){}
+  const el=document.getElementById('ts');
+  if(!raw){el.classList.remove('on');return}
+  const diff=Date.now()-parseInt(raw);
+  const mi=Math.floor(diff/60000),hr=Math.floor(diff/3600000);
+  let s='just now';
+  if(hr>=168)s=Math.floor(hr/24)+'d ago';
+  else if(hr>=1)s=hr+'h ago';
+  else if(mi>=1)s=mi+'m ago';
+  el.textContent=s;el.classList.add('on');
+}
+
+/* ═══ MIDNIGHT ═══ */
+function midnight(){
+  let sv;try{sv=localStorage.getItem(K.d)}catch(e){}
+  if(sv&&sv!==td()){
+    try{localStorage.removeItem(K.m);localStorage.removeItem(K.d);localStorage.removeItem(K.ds)}catch(e){}
+    document.querySelectorAll('.o').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));
+    document.getElementById('q').classList.remove('on');
+    document.getElementById('dpick').classList.remove('on');
+    document.getElementById('tfill').style.width='0';
+    curDopa=-1;stamp();return true;
+  }
+  return false;
+}
+
+/* ═══ INIT ═══ */
+(function(){
+  midnight();
+  let sv;try{sv=localStorage.getItem(K.m)}catch(e){}
+  if(sv)pick(sv);
+
+  let ds;try{ds=localStorage.getItem(K.ds)}catch(e){}
+  if(ds!==null)dopaPick(parseInt(ds));
+
+  stamp();
+  setInterval(stamp,60000);
+  setInterval(midnight,30000);
+})();
+</script>
+
+</body>
+</html>
