@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    a.product-link {
+      display: block;
+      text-decoration: none;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      max-width: 600px;
+      width: 100%;
+    }
+    a.product-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    a.product-link img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 
+    HOW TO USE:
+    1. Replace GUMROAD_PRODUCT_URL with your Gumroad product link
+    2. Replace COVER_IMAGE_URL with your Gumroad cover image URL
+       (Right-click your cover image on Gumroad → Copy image address)
+    3. Deploy to Netlify
+    4. Embed the Netlify URL in Notion
+  -->
+
+  <a class="product-link" href="https://notomantra.gumroad.com/l/life-os" target="_blank" rel="noopener">
+    <img src="https://public-files.gumroad.com/vc04yd1egtjrch8yly100rcr7d7d" alt="Product Cover">
+  </a>
+
+</body>
+</html>
