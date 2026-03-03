@@ -23,6 +23,7 @@
       cursor: pointer;
       max-width: 600px;
       width: 100%;
+      position: relative;
     }
     a.product-link:hover {
       transform: translateY(-2px);
@@ -32,23 +33,81 @@
       display: block;
       width: 100%;
       height: auto;
-      border-radius: 12px;
+    }
+
+    /* Bottom bar overlay */
+    .upgrade-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .upgrade-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .upgrade-text .spark {
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    .upgrade-text span {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(11px, 2.5vw, 13px);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upgrade-btn {
+      flex-shrink: 0;
+      background: #fff;
+      color: #111;
+      font-size: clamp(10px, 2.2vw, 12px);
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      letter-spacing: 0.2px;
+      transition: background 0.2s ease;
+    }
+
+    a.product-link:hover .upgrade-btn {
+      background: #e8e8e8;
     }
   </style>
 </head>
 <body>
 
-  <!-- 
+  <!--
     HOW TO USE:
-    1. Replace GUMROAD_PRODUCT_URL with your Gumroad product link
-    2. Replace COVER_IMAGE_URL with your Gumroad cover image URL
-       (Right-click your cover image on Gumroad → Copy image address)
-    3. Deploy to Netlify
-    4. Embed the Netlify URL in Notion
+    1. Replace href with your paid Gumroad product link
+    2. Replace img src with your cover image URL
+    3. Edit the upgrade text and button label below
+    4. Deploy & embed in Notion
   -->
 
   <a class="product-link" href="https://notomantra.gumroad.com/l/life-os" target="_blank" rel="noopener">
     <img src="https://public-files.gumroad.com/vc04yd1egtjrch8yly100rcr7d7d" alt="Product Cover">
+    <div class="upgrade-bar">
+      <div class="upgrade-text">
+        <span class="spark">✦</span>
+        <span>Unlock Pro — advanced dashboards, automations & more</span>
+      </div>
+      <div class="upgrade-btn">Upgrade →</div>
+    </div>
   </a>
 
 </body>
