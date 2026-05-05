@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wealth Projector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #ffffff;
+    --mute: #5e5e5e;
+    --line: #0a0a0a;
+    --gain: #1e8a4f;
+    --loss: #c8102e;
+    --border-w: 2.5px;
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 22px 16px 32px;
+  }
+
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 0 4px;
+  }
+
+  .brand {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .brand em {
+    font-style: italic;
+    color: var(--mute);
+  }
+
+  .stamp {
+    font-size: 11px;
+    color: var(--mute);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  /* Hero card */
+  .hero {
+    background: var(--paper);
+    border: var(--border-w) solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 26px 28px 18px;
+    margin-bottom: 14px;
+  }
+
+  .hero-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 6px;
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .hero-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .gain-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--gain);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13.5px;
+    letter-spacing: 0.01em;
+    transform: translateY(-4px);
+  }
+
+  .gain-pill.loss { background: var(--loss); }
+
+  .gain-arrow {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .hero-sub {
+    font-size: 13.5px;
+    color: var(--mute);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .hero-trend {
+    width: 100%;
+    height: 150px;
+    display: block;
+  }
+
+  .trend-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+    padding-left: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mute);
+    letter-spacing: 0.04em;
+  }
+
+  .legend-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-line-solid {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+
+  .legend-line-dashed {
+    display: inline-block;
+    width: 18px;
+    height: 0;
+    border-top: 2px dashed var(--mute);
+  }
+
+  /* Inputs grid */
+  .inputs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .input-cell {
+    background: var(--paper);
+    border: var(--border-w) solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 14px 16px 12px;
+    transition: background 0.12s ease;
+  }
+
+  .input-cell:focus-within { background: #fafafa; }
+
+  .input-cell label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 6px;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .input-wrap .prefix,
+  .input-wrap .suffix {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--mute);
+    line-height: 1;
+  }
+
+  .input-wrap input {
+    border: none;
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    width: 100%;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    -moz-appearance: textfield;
+  }
+
+  .input-wrap input::-webkit-outer-spin-button,
+  .input-wrap input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Sub metrics */
+  .sub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .sub-card {
+    background: var(--paper);
+    border: var(--border-w) solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px 18px 18px;
+  }
+
+  .sub-card-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 6px;
+  }
+
+  .sub-card-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    font-weight: 400;
+  }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding: 0 6px;
+    font-size: 11.5px;
+    color: var(--mute);
+    font-weight: 500;
+  }
+
+  .footer button {
+    background: transparent;
+    border: none;
+    color: var(--mute);
+    cursor: pointer;
+    padding: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-family: inherit;
+  }
+
+  .footer button:hover { color: var(--loss); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .inputs { grid-template-columns: 1fr 1fr; }
+    .sub-grid { grid-template-columns: 1fr; }
+    .hero-value { font-size: 48px; }
+    .input-wrap input, .input-wrap .prefix, .input-wrap .suffix { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">Wealth <em>Projector</em></div>
+    <div class="stamp" id="stamp">SCENARIO</div>
+  </div>
+
+  <!-- Hero result -->
+  <div class="hero">
+    <div class="hero-label">Projected Final Amount</div>
+    <div class="hero-row">
+      <div class="hero-value" id="hero-value">$0</div>
+      <div class="gain-pill" id="gain-pill">
+        <span class="gain-arrow" id="gain-arrow">▲</span>
+        <span id="gain-value">+0%</span>
+      </div>
+    </div>
+    <div class="hero-sub" id="hero-sub">Adjust the inputs below to see your scenario</div>
+    <svg class="hero-trend" id="hero-trend" viewBox="0 0 700 150" preserveAspectRatio="none"></svg>
+    <div class="trend-legend">
+      <span class="legend-mark"><span class="legend-line-solid"></span>Balance</span>
+      <span class="legend-mark"><span class="legend-line-dashed"></span>Contributions</span>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div class="inputs">
+    <div class="input-cell">
+      <label>Starting Amount</label>
+      <div class="input-wrap">
+        <span class="prefix">$</span>
+        <input id="i-starting" type="number" min="0" step="100" value="5000" />
+      </div>
+    </div>
+    <div class="input-cell">
+      <label>Monthly Save</label>
+      <div class="input-wrap">
+        <span class="prefix">$</span>
+        <input id="i-monthly" type="number" min="0" step="50" value="500" />
+      </div>
+    </div>
+    <div class="input-cell">
+      <label>Annual Return</label>
+      <div class="input-wrap">
+        <input id="i-return" type="number" min="-50" max="50" step="0.5" value="8" />
+        <span class="suffix">%</span>
+      </div>
+    </div>
+    <div class="input-cell">
+      <label>Years</label>
+      <div class="input-wrap">
+        <input id="i-years" type="number" min="1" max="60" step="1" value="25" />
+        <span class="suffix">yrs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub metrics -->
+  <div class="sub-grid">
+    <div class="sub-card">
+      <div class="sub-card-label">You Contribute</div>
+      <div class="sub-card-value" id="sub-contributed">$0</div>
+    </div>
+    <div class="sub-card">
+      <div class="sub-card-label">Interest Earned</div>
+      <div class="sub-card-value" id="sub-interest">$0</div>
+    </div>
+    <div class="sub-card">
+      <div class="sub-card-label">Money Multiplier</div>
+      <div class="sub-card-value" id="sub-multiplier">0×</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Inputs saved locally in your browser. Nothing sent online.</span>
+    <button id="reset-btn">Reset to defaults</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'wealth_projector_v1';
+  const DEFAULTS = { starting: 5000, monthly: 500, returnPct: 8, years: 25 };
+
+  // ---------- Storage ----------
+  const loadInputs = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
+    } catch { return { ...DEFAULTS }; }
+  };
+  const saveInputs = (state) => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  };
+
+  // ---------- Formatting ----------
+  const fmtFull = (n) => {
+    const sign = n < 0 ? '-' : '';
+    const abs = Math.abs(Math.round(n));
+    return sign + '$' + abs.toLocaleString();
+  };
+
+  // ---------- Math: compound monthly with monthly contributions ----------
+  function project(starting, monthly, ratePct, years) {
+    const monthlyRate = (ratePct / 100) / 12;
+    const points = [{ year: 0, balance: starting, contributed: starting }];
+    let balance = starting;
+    let contributed = starting;
+    for (let y = 1; y <= years; y++) {
+      for (let m = 0; m < 12; m++) {
+        balance = balance * (1 + monthlyRate) + monthly;
+        contributed += monthly;
+      }
+      points.push({ year: y, balance, contributed });
+    }
+    return points;
+  }
+
+  // ---------- Trendline render ----------
+  function renderTrend(points) {
+    const svg = document.getElementById('hero-trend');
+    const W = 700, H = 150;
+    const padX = 10, padTop = 14, padBottom = 22;
+    const allValues = points.flatMap(p => [p.balance, p.contributed]);
+    const max = Math.max(...allValues, 1);
+    const min = Math.min(...allValues, 0);
+    const range = max - min || 1;
+
+    const xFor = (i) => padX + (i / (points.length - 1)) * (W - padX * 2);
+    const yFor = (v) => H - padBottom - ((v - min) / range) * (H - padTop - padBottom);
+
+    // Year ticks every 5 years
+    let ticks = '';
+    for (let y = 5; y < points.length; y += 5) {
+      const x = xFor(y);
+      ticks += `<line x1="${x}" y1="${H - padBottom}" x2="${x}" y2="${H - padBottom + 4}" stroke="#bbb" stroke-width="1"/>`;
+      ticks += `<text x="${x}" y="${H - 4}" text-anchor="middle" fill="#999" font-family="DM Sans, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.5">Y${y}</text>`;
+    }
+
+    const balPts = points.map((p, i) => [xFor(i), yFor(p.balance)]);
+    const contribPts = points.map((p, i) => [xFor(i), yFor(p.contributed)]);
+
+    const balPath = balPts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const baseY = yFor(min);
+    const balArea = balPath + ` L${xFor(points.length - 1).toFixed(1)},${baseY.toFixed(1)} L${padX.toFixed(1)},${baseY.toFixed(1)} Z`;
+    const contribPath = contribPts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+
+    const lastBal = balPts[balPts.length - 1];
+    const finalUp = points[points.length - 1].balance >= points[points.length - 1].contributed;
+    const dotColor = finalUp ? '#1e8a4f' : '#c8102e';
+
+    svg.innerHTML = `
+      <path d="${balArea}" fill="#0a0a0a" opacity="0.06" stroke="none"/>
+      <line x1="${padX}" y1="${(H - padBottom).toFixed(1)}" x2="${(W - padX).toFixed(1)}" y2="${(H - padBottom).toFixed(1)}" stroke="#cdcdcd" stroke-width="1"/>
+      ${ticks}
+      <path d="${contribPath}" fill="none" stroke="#5e5e5e" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round"/>
+      <path d="${balPath}" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${lastBal[0].toFixed(1)}" cy="${lastBal[1].toFixed(1)}" r="6.5" fill="${dotColor}" stroke="white" stroke-width="2.5"/>
+    `;
+  }
+
+  // ---------- Update ----------
+  function update() {
+    const starting = Math.max(0, +document.getElementById('i-starting').value || 0);
+    const monthly = Math.max(0, +document.getElementById('i-monthly').value || 0);
+    const returnPct = +document.getElementById('i-return').value || 0;
+    const years = Math.min(60, Math.max(1, Math.round(+document.getElementById('i-years').value || 1)));
+
+    saveInputs({ starting, monthly, returnPct, years });
+
+    const points = project(starting, monthly, returnPct, years);
+    const result = points[points.length - 1];
+    const interest = result.balance - result.contributed;
+    const multiplier = result.contributed > 0 ? result.balance / result.contributed : 0;
+    const gainPct = result.contributed > 0 ? (interest / result.contributed) * 100 : 0;
+
+    document.getElementById('hero-value').textContent = fmtFull(result.balance);
+
+    const pill = document.getElementById('gain-pill');
+    const arrow = document.getElementById('gain-arrow');
+    if (gainPct >= 0) {
+      pill.classList.remove('loss');
+      arrow.textContent = '▲';
+    } else {
+      pill.classList.add('loss');
+      arrow.textContent = '▼';
+    }
+    document.getElementById('gain-value').textContent = (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1) + '%';
+
+    document.getElementById('hero-sub').textContent =
+      `In ${years} year${years === 1 ? '' : 's'} at ${returnPct}% annual return, compounded monthly`;
+
+    document.getElementById('sub-contributed').textContent = fmtFull(result.contributed);
+    document.getElementById('sub-interest').textContent = fmtFull(interest);
+    document.getElementById('sub-multiplier').textContent = multiplier.toFixed(2) + '×';
+
+    renderTrend(points);
+  }
+
+  // ---------- Init ----------
+  const initial = loadInputs();
+  document.getElementById('i-starting').value = initial.starting;
+  document.getElementById('i-monthly').value = initial.monthly;
+  document.getElementById('i-return').value = initial.returnPct;
+  document.getElementById('i-years').value = initial.years;
+
+  ['i-starting', 'i-monthly', 'i-return', 'i-years'].forEach(id => {
+    document.getElementById(id).addEventListener('input', update);
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Reset inputs to default values?')) {
+      document.getElementById('i-starting').value = DEFAULTS.starting;
+      document.getElementById('i-monthly').value = DEFAULTS.monthly;
+      document.getElementById('i-return').value = DEFAULTS.returnPct;
+      document.getElementById('i-years').value = DEFAULTS.years;
+      update();
+    }
+  });
+
+  // Stamp
+  document.getElementById('stamp').textContent =
+    new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+
+  update();
+})();
+</script>
+</body>
+</html>
