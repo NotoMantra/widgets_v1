@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing Sprint</title>
+<style>
+  /* ---- Novelist OS · Writing Sprint timer ----
+     The value is the live countdown. It works fully with no storage.
+     localStorage only remembers your preferred length, today's count,
+     and mute, none of which hurts to lose. No external dependencies. ---- */
+  :root{
+    --ink:#5b3a26; --accent:#a05a2c; --accent-soft:#c98a5e;
+    --line:#e7d6c7; --track:#f0e3d7; --card:#fffdfb; --muted:#9b7d68;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:transparent;}
+  body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:8px;}
+  .card{width:100%;max-width:430px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px 18px;box-shadow:0 1px 2px rgba(110,63,34,.04),0 6px 22px rgba(110,63,34,.06);}
+
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .top svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+  .title{font-family:Georgia,"Times New Roman",serif;font-size:17px;color:var(--ink);}
+  .spacer{flex:1;}
+  .tag{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+
+  .ring-wrap{position:relative;width:188px;height:188px;margin:14px auto 6px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .track{fill:none;stroke:var(--track);stroke-width:9;}
+  .prog{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+  .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .time{font-family:Georgia,serif;font-size:46px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .phase{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:7px;}
+
+  .presets{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;}
+  .chip{font-family:Georgia,serif;font-size:13px;padding:6px 16px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s ease;}
+  .chip:hover{border-color:var(--accent-soft);color:var(--accent);}
+  .chip.sel{border-color:var(--accent);color:#fff;background:var(--accent);}
+
+  .controls{display:flex;gap:10px;margin:16px 0 12px;}
+  .btn{flex:1;font-family:Georgia,serif;font-size:14px;padding:11px;border-radius:11px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s ease,color .15s ease;}
+  .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .btn.primary.run{background:var(--accent);color:#fff;}
+  .btn:hover{background:#faf2ea;}
+  .btn.primary.run:hover{background:#8f4f26;}
+  .btn.ghost{flex:0 0 auto;width:46px;border-color:var(--line);color:var(--muted);}
+  .btn.ghost:hover{color:var(--accent);border-color:var(--accent-soft);background:transparent;}
+
+  .foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:11px;}
+  .today{font-size:11px;color:var(--muted);}
+  .today b{font-family:Georgia,serif;color:var(--ink);font-size:14px;font-weight:400;}
+  .mute{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.4px;color:var(--muted);cursor:pointer;}
+  .mute svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13V9M9 2h6M18 6l1.5-1.5"/></svg>
+      <div class="title">Writing Sprint</div>
+      <div class="spacer"></div>
+      <div class="tag">Novelist OS</div>
+    </div>
+
+    <div class="ring-wrap">
+      <svg width="188" height="188" viewBox="0 0 188 188">
+        <circle class="track" cx="94" cy="94" r="84"></circle>
+        <circle class="prog" id="prog" cx="94" cy="94" r="84"></circle>
+      </svg>
+      <div class="center">
+        <div class="time" id="time">25:00</div>
+        <div class="phase" id="phase">Ready</div>
+      </div>
+    </div>
+
+    <div class="presets" id="presets">
+      <button class="chip" data-min="15">15 min</button>
+      <button class="chip sel" data-min="25">25 min</button>
+      <button class="chip" data-min="45">45 min</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="start"><svg id="sicon" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg><span id="slabel">Start</span></button>
+      <button class="btn ghost" id="reset" title="Reset"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg></button>
+    </div>
+
+    <div class="foot">
+      <div class="today">Sprints today <b id="count">0</b></div>
+      <div class="mute" id="mute"><svg id="micon" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM16 9a4 4 0 0 1 0 6"/></svg><span id="mlabel">Sound on</span></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const KEY="novelistOS.sprint.v1";
+  const C=2*Math.PI*84;                 // ring circumference
+  let mem=null;
+
+  function load(){ try{ const r=localStorage.getItem(KEY); return r?JSON.parse(r):{}; }catch(e){ return mem||{}; } }
+  function save(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){ mem=o; } }
+
+  const todayStr=()=>new Date().toISOString().slice(0,10);
+
+  let saved=load();
+  let minutes=saved.minutes||25;
+  let muted=!!saved.muted;
+  let count=(saved.today&&saved.today.date===todayStr())?saved.today.count:0;
+
+  let total=minutes*60, remaining=total, timer=null, running=false;
+
+  const $=id=>document.getElementById(id);
+  const prog=$("prog"); prog.style.strokeDasharray=C;
+
+  function persist(){ save({minutes,muted,today:{date:todayStr(),count}}); }
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+
+  function paint(){
+    $("time").textContent=fmt(remaining);
+    prog.style.strokeDashoffset = C*(1 - remaining/total);
+    $("count").textContent=count;
+  }
+  function setPhase(t){ $("phase").textContent=t; }
+
+  function selectMinutes(m){
+    minutes=m; total=m*60; remaining=total; persist();
+    document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("sel", +c.dataset.min===m));
+    stop(); setPhase("Ready"); paint();
+  }
+
+  function chime(){
+    if(muted) return;
+    try{
+      const A=new (window.AudioContext||window.webkitAudioContext)();
+      const o=A.createOscillator(), g=A.createGain();
+      o.type="sine"; o.frequency.value=660; o.connect(g); g.connect(A.destination);
+      g.gain.setValueAtTime(0.0001,A.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.18,A.currentTime+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,A.currentTime+1.1);
+      o.start(); o.stop(A.currentTime+1.1);
+    }catch(e){}
+  }
+
+  function tick(){
+    remaining--;
+    if(remaining<=0){
+      remaining=0; paint(); stop();
+      setPhase("Done"); count++; persist(); $("count").textContent=count; chime();
+      $("time").textContent="Done"; return;
+    }
+    paint();
+  }
+  function start(){
+    if(running) return;
+    if(remaining<=0){ remaining=total; }
+    running=true; timer=setInterval(tick,1000);
+    $("start").classList.add("run"); $("slabel").textContent="Pause";
+    $("sicon").innerHTML='<path d="M8 5v14M16 5v14"/>'; setPhase("Writing");
+  }
+  function pause(){
+    running=false; clearInterval(timer);
+    $("start").classList.remove("run"); $("slabel").textContent="Resume";
+    $("sicon").innerHTML='<path d="M7 4l13 8-13 8z"/>'; setPhase("Paused");
+  }
+  function stop(){
+    running=false; clearInterval(timer);
+    $("start").classList.remove("run"); $("slabel").textContent="Start";
+    $("sicon").innerHTML='<path d="M7 4l13 8-13 8z"/>';
+  }
+
+  $("start").addEventListener("click",()=>{ running?pause():start(); });
+  $("reset").addEventListener("click",()=>{ remaining=total; stop(); setPhase("Ready"); paint(); });
+  $("presets").addEventListener("click",e=>{ const c=e.target.closest(".chip"); if(c) selectMinutes(+c.dataset.min); });
+  $("mute").addEventListener("click",()=>{
+    muted=!muted; persist();
+    $("mlabel").textContent=muted?"Sound off":"Sound on";
+    $("micon").innerHTML=muted?'<path d="M11 5L6 9H3v6h3l5 4zM22 9l-6 6M16 9l6 6"/>':'<path d="M11 5L6 9H3v6h3l5 4zM16 9a4 4 0 0 1 0 6"/>';
+  });
+
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("sel", +c.dataset.min===minutes));
+  if(muted){ $("mlabel").textContent="Sound off"; $("micon").innerHTML='<path d="M11 5L6 9H3v6h3l5 4zM22 9l-6 6M16 9l6 6"/>'; }
+  paint();
+})();
+</script>
+</body>
+</html>
